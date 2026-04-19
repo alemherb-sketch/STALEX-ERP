@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Cotizaciones | STALEX-ERP{% endblock %}
+{% block header_title %}Comercial - Cotizaciones{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Listado de Cotizaciones Emitidas</h2>
+        <a href="{% url 'ventas:cotizacion_create' %}" class="btn btn-primary">
+            <span class="material-symbols-outlined">add</span> Nueva Cotización
+        </a>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Número</th>
+                    <th>Fecha</th>
+                    <th>Cliente</th>
+                    <th>Estado</th>
+                    <th style="text-align: right;">Total</th>
+                    <th style="text-align: center;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cotizacion in cotizaciones %}
+                <tr>
+                    <td style="font-weight: 600; color: var(--primary-color);">{{ cotizacion.numero }}</td>
+                    <td>{{ cotizacion.fecha|date:"d/m/Y" }}</td>
+                    <td style="font-weight: 500;">{{ cotizacion.cliente.razon_social_nombres }}</td>
+                    <td>
+                        <span class="badge {% if cotizacion.estado == 'BORRADOR' %}badge-yellow{% elif cotizacion.estado == 'ACEPTADA' %}badge-green{% elif cotizacion.estado == 'ANULADA' %}badge-red{% else %}badge-blue{% endif %}">
+                            {{ cotizacion.get_estado_display }}
+                        </span>
+                    </td>
+                    <td style="text-align: right; font-weight: 700;">S/. {{ cotizacion.total }}</td>
+                    <td style="text-align: center; display: flex; gap: 0.25rem; justify-content: center; flex-wrap: wrap;">
+                        <a href="{% url 'ventas:cotizacion_print' cotizacion.pk %}" class="btn btn-secondary" style="padding: 0.25rem 0.5rem;" title="Imprimir" target="_blank">
+                            <span class="material-symbols-outlined" style="font-size: 1.1rem;">print</span>
+                        </a>
+                        <a href="{% url 'ventas:cotizacion_update' cotizacion.pk %}" class="btn btn-primary" style="padding: 0.25rem 0.5rem; background-color: #f59e0b; border-color: #f59e0b;" title="Editar">
+                            <span class="material-symbols-outlined" style="font-size: 1.1rem;">edit</span>
+                        </a>
+                        {% if cotizacion.estado != 'ANULADA' and cotizacion.estado != 'ACEPTADA' %}
+                        <form action="{% url 'ventas:cotizacion_generar_pedido' cotizacion.pk %}" method="post" style="display:inline;" onsubmit="return confirm('¿Generar una Orden de Pedido a partir de esta cotización? Se copiará toda la información.');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn" style="padding: 0.25rem 0.5rem; background-color: #16a34a; border-color: #16a34a; color: white;" title="Generar Orden de Pedido">
+                                <span class="material-symbols-outlined" style="font-size: 1.1rem;">shopping_cart_checkout</span>
+                            </button>
+                        </form>
+                        {% endif %}
+                        {% if cotizacion.estado != 'ANULADA' %}
+                        <form action="{% url 'ventas:cotizacion_anular' cotizacion.pk %}" method="post" style="display:inline;" onsubmit="return confirm('¿Estás seguro de que deseas ANULAR esta cotización?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger" style="padding: 0.25rem 0.5rem; background-color: #64748b; border-color: #64748b;" title="Anular">
+                                <span class="material-symbols-outlined" style="font-size: 1.1rem;">block</span>
+                            </button>
+                        </form>
+                        {% endif %}
+                        <a href="{% url 'ventas:cotizacion_delete' cotizacion.pk %}" class="btn btn-danger" style="padding: 0.25rem 0.5rem;" title="Eliminar">
+                            <span class="material-symbols-outlined" style="font-size: 1.1rem;">delete</span>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center; color: var(--text-muted);">No hay cotizaciones registradas aún.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

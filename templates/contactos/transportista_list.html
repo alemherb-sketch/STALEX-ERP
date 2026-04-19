@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Transportistas | STALEX-ERP{% endblock %}
+{% block header_title %}Directorio de Transportistas{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Listado de Transportistas</h2>
+        <a href="{% url 'contactos:transportista_create' %}" class="btn btn-primary">
+            <span class="material-symbols-outlined">add</span> Nuevo Transportista
+        </a>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Documento</th>
+                    <th>Razón Social / Nombre</th>
+                    <th>Placa</th>
+                    <th>Licencia</th>
+                    <th>Teléfono</th>
+                    <th style="text-align: right;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transportista in transportistas %}
+                <tr>
+                    <td>{{ transportista.tipo_documento }} {{ transportista.numero_documento }}</td>
+                    <td style="font-weight: 500;">{{ transportista.nombre }}</td>
+                    <td style="font-weight: 600; color: var(--primary-color);">{{ transportista.placa_vehiculo|default:"-" }}</td>
+                    <td>{{ transportista.licencia_conducir|default:"-" }}</td>
+                    <td>{{ transportista.telefono|default:"-" }}</td>
+                    <td style="text-align: right; display: flex; gap: 0.5rem; justify-content: flex-end;">
+                        <a href="{% url 'contactos:transportista_update' transportista.pk %}" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; background-color: #f59e0b; border-color: #f59e0b;" title="Editar">
+                            <span class="material-symbols-outlined" style="font-size: 1rem;">edit</span>
+                        </a>
+                        <a href="{% url 'contactos:transportista_delete' transportista.pk %}" class="btn btn-danger" style="padding: 0.25rem 0.5rem;" title="Eliminar">
+                            <span class="material-symbols-outlined" style="font-size: 1rem;">delete</span>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted);">No hay transportistas registrados aún.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

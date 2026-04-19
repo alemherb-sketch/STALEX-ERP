@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Editar Almacén{% else %}Nuevo Almacén{% endif %} | STALEX-ERP{% endblock %}
+{% block header_title %}{% if object %}Editar Almacén{% else %}Nuevo Almacén{% endif %}{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 800px; margin: 0 auto;">
+    <div class="card-header">
+        <h2 class="card-title">Datos del Almacén</h2>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label class="form-label" for="{{ form.nombre.id_for_label }}">Nombre del Almacén</label>
+            {{ form.nombre }}
+            {{ form.nombre.errors }}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="{{ form.ubicacion.id_for_label }}">Ubicación Detallada</label>
+            {{ form.ubicacion }}
+            {{ form.ubicacion.errors }}
+        </div>
+
+        <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
+            <a href="{% url 'inventario:almacen_list' %}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary">
+                <span class="material-symbols-outlined">save</span> Guardar
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

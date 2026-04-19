@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Recibir Orden de Compra | STALEX-ERP{% endblock %}
+{% block header_title %}Recibir Mercadería{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <div class="card-header">
+        <h2 class="card-title">Ingresar a Almacén: {{ orden.numero }}</h2>
+    </div>
+    
+    <div style="padding: 1rem; background: #fffbeb; border: 1px solid #fef3c7; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+        <p style="color: #92400e; font-size: 0.95rem;">
+            <strong>¡Atención!</strong> Esta acción incrementará el stock físico de los productos incluidos en la orden en el almacén seleccionado. Registre esta acción solo cuando la mercadería haya llegado físicamente.
+        </p>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label class="form-label" for="almacen">Seleccionar Almacén de Destino</label>
+            <select name="almacen" id="almacen" class="form-control" required>
+                <option value="">--- Seleccione un almacén ---</option>
+                {% for a in almacenes %}
+                <option value="{{ a.id }}">{{ a.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div style="margin-top: 1.5rem;">
+            <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">Resumen de Ítems:</h3>
+            <ul style="list-style: none; padding: 0;">
+                {% for detalle in orden.detalles.all %}
+                <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between;">
+                    <span>{{ detalle.producto.nombre }} {% if detalle.presentacion %}({{ detalle.presentacion.nombre }}){% endif %}</span>
+                    <strong>x {{ detalle.cantidad }}</strong>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
+            <a href="{% url 'compras:orden_compra_list' %}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-success">
+                <span class="material-symbols-outlined">check_circle</span> Confirmar Recepción
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

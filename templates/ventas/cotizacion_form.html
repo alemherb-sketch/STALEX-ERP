@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+
+{% block title %}Nueva Cotización | STALEX-ERP{% endblock %}
+{% block header_title %}Nueva Cotización{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Datos Principales</h2>
+    </div>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div class="grid-cols-2">
+            <div class="form-group">
+                <label class="form-label">Fecha</label>
+                {{ form.fecha }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Cliente</label>
+                {{ form.cliente }}
+            </div>
+        </div>
+        
+        <div class="form-group" style="margin-top: 1rem;">
+            <label class="form-label">Notas</label>
+            {{ form.notas }}
+        </div>
+
+        <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--primary-color);">Detalles (Ítems)</h3>
+        
+        <div class="table-wrapper" style="margin-bottom: 1rem;">
+            {{ detalles.management_form }}
+            <table id="detalles-table">
+                <thead>
+                    <tr>
+                        <th style="width: 35%;">Producto</th>
+                        <th style="width: 20%;">Presentación</th>
+                        <th>Cantidad</th>
+                        <th>Precio Unitario (S/.)</th>
+                        <th>SubTotal (S/.)</th>
+                        <th>Eliminar</th>
+                    </tr>
+                </thead>
+                <tbody id="formset-tbody">
+                    {% for form in detalles %}
+                    <tr class="formset-row">
+                        <td>{{ form.producto }}</td>
+                        <td>{{ form.presentacion }}</td>
+                        <td>{{ form.cantidad }}</td>
+                        <td>{{ form.precio_unitario }}</td>
+                        <td style="vertical-align: middle; font-weight: bold; color: var(--primary-color);"><span class="row-subtotal">0.00</span></td>
+                        <td>
+                            {% if form.instance.pk %}{{ form.DELETE }}{% endif %}
+                            <button type="button" class="btn btn-danger btn-remove-row" style="padding: 0.25rem 0.5rem;"><span class="material-symbols-outlined" style="font-size: 1rem;">delete</span></button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <button type="button" id="add-row-btn" class="btn btn-secondary" style="margin-bottom: 2rem;">
+            <span class="material-symbols-outlined">add</span> Añadir Ítem
+        </button>
+
+        <div style="background: #f8fafc; padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); width: 300px; margin-left: auto; margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span style="color: var(--text-muted);">SubTotal:</span>
+                <strong>S/. <span id="label-subtotal">0.00</span></strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span style="color: var(--text-muted);">IGV (18%):</span>
+                <strong>S/. <span id="label-igv">0.00</span></strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--border-color); padding-top: 0.5rem; margin-top: 0.5rem; font-size: 1.1rem; color: var(--primary-color);">
+                <strong>Total General:</strong>
+                <strong>S/. <span id="label-total">0.00</span></strong>
+            </div>
+        </div>
+
+        <!-- Form template invisible para Javascript -->
+        <table style="display: none;">
+            <tbody id="empty-form-template">
+                <tr class="formset-row">
+                    <td>{{ detalles.empty_form.producto }}</td>
+                    <td>{{ detalles.empty_form.presentacion }}</td>
+                    <td>{{ detalles.empty_form.cantidad }}</td>
+                    <td>{{ detalles.empty_form.precio_unitario }}</td>
+                    <td style="vertical-align: middle; font-weight: bold; color: var(--primary-color);"><span class="row-subtotal">0.00</span></td>
+                    <td>
+                        <button type="button" class="btn btn-danger btn-remove-row" style="padding: 0.25rem 0.5rem;"><span class="material-symbols-outlined" style="font-size: 1rem;">delete</span></button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+            <a href="{% url 'ventas:cotizacion_list' %}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary">
+                <span class="material-symbols-outlined">save</span> Generar Cotización
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tableBody = document.getElementById('formset-tbody');
+    const addBtn = document.getElementById('add-row-btn');
+    const emptyFormTemplate = document.getElementById('empty-form-template').innerHTML;
+    const totalForms = document.getElementById('id_detalles-TOTAL_FORMS');
+
+    addBtn.addEventListener('click', function() {
+        const formCount = parseInt(totalForms.value);
+        const newFormHtml = emptyFormTemplate.replace(/__prefix__/g, formCount);
+        tableBody.insertAdjacentHTML('beforeend', newFormHtml);
+        totalForms.value = formCount + 1;
+    });
+
+    tableBody.addEventListener('click', function(e) {
+        if (e.target.closest('.btn-remove-row')) {
+            const row = e.target.closest('tr');
+            // Si tiene el input checkbox DELETE (ya estaba en BD), lo marcamos y ocultamos. Si no, borramos el tr.
+            const deleteInput = row.querySelector('input[type="checkbox"][id$="-DELETE"]');
+            if (deleteInput) {
+                deleteInput.checked = true;
+                row.style.display = 'none';
+            } else {
+                row.remove();
+                // Actualizar índices. Es preferible siempre incrementar TOTAL_FORMS, no necesitamos decrementar si Django lo maneja.
+            }
+        }
+    });
+
+    const dictPrecios = {{ product_prices|safe }};
+    
+    function calcularTotales() {
+        let subtotal = 0;
+        const rows = document.querySelectorAll('#formset-tbody .formset-row');
+        
+        rows.forEach(row => {
+            if (row.style.display !== 'none') {
+                const cantidadInput = row.querySelector('input[id$="-cantidad"]');
+                const precioInput = row.querySelector('input[id$="-precio_unitario"]');
+                
+                if (cantidadInput && precioInput) {
+                    const cant = parseFloat(cantidadInput.value) || 0;
+                    const prec = parseFloat(precioInput.value) || 0;
+                    const rowSub = cant * prec;
+                    subtotal += rowSub;
+                    
+                    const rowSubtotalEl = row.querySelector('.row-subtotal');
+                    if (rowSubtotalEl) {
+                        rowSubtotalEl.innerText = rowSub.toFixed(2);
+                    }
+                }
+            }
+        });
+        
+        const igv = subtotal * 0.18;
+        const total = subtotal + igv;
+        
+        document.getElementById('label-subtotal').innerText = subtotal.toFixed(2);
+        document.getElementById('label-igv').innerText = igv.toFixed(2);
+        document.getElementById('label-total').innerText = total.toFixed(2);
+    }
+
+    // Auto populate precio and fetch presentations
+    tableBody.addEventListener('change', async function(e) {
+        const row = e.target.closest('tr');
+        
+        // Cambio de Producto
+        if (e.target.classList.contains('product-select')) {
+            const productoId = e.target.value;
+            const presentationSelect = row.querySelector('.presentation-select');
+            const precioInput = row.querySelector('input[id$="-precio_unitario"]');
+            
+            if (productoId) {
+                try {
+                    const response = await fetch(`/inventario/productos/api/info/${productoId}/`);
+                    const data = await response.json();
+                    
+                    // Update Price
+                    precioInput.value = data.precio_venta;
+                    
+                    // Populate Presentations
+                    presentationSelect.innerHTML = '<option value="">--- Base/Unidad ---</option>';
+                    data.presentaciones.forEach(p => {
+                        const opt = document.createElement('option');
+                        opt.value = p.id;
+                        opt.dataset.precioPaquete = p.id ? p.precio_paquete : data.precio_venta;
+                        opt.innerText = `${p.nombre} (S/. ${p.precio_paquete})`;
+                        presentationSelect.appendChild(opt);
+                    });
+                } catch (err) {
+                    console.error('Error fetching product details:', err);
+                }
+            } else {
+                precioInput.value = '';
+                presentationSelect.innerHTML = '<option value="">---------</option>';
+            }
+            calcularTotales();
+        }
+        
+        // Cambio de Presentación
+        if (e.target.classList.contains('presentation-select')) {
+            const selectedOption = e.target.options[e.target.selectedIndex];
+            const precioInput = row.querySelector('input[id$="-precio_unitario"]');
+            
+            if (e.target.value && selectedOption.dataset.precioPaquete) {
+                precioInput.value = parseFloat(selectedOption.dataset.precioPaquete).toFixed(2);
+            } else {
+                // If reset to base, fetch base price again or use a hidden field. 
+                // Simplest: trigger product change logic or store base price in data-attribute.
+                const productSelect = row.querySelector('.product-select');
+                if (productSelect.value) {
+                    const response = await fetch(`/inventario/productos/api/info/${productSelect.value}/`);
+                    const data = await response.json();
+                    precioInput.value = data.precio_venta;
+                }
+            }
+            calcularTotales();
+        }
+    });
+
+    tableBody.addEventListener('input', function(e) {
+        if (e.target.tagName === 'INPUT' && (e.target.id.includes('-cantidad') || e.target.id.includes('-precio_unitario'))) {
+            calcularTotales();
+        }
+    });
+
+    tableBody.addEventListener('click', function(e) {
+        if (e.target.closest('.btn-remove-row')) {
+            setTimeout(calcularTotales, 50); // Calculate after the removal logic has executed
+        }
+    });
+
+    // Calcular al iniciar por si recarga o edita
+    calcularTotales();
+});
+</script>
+{% endblock %}

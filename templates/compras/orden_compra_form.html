@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Editar Orden de Compra{% else %}Nueva Orden de Compra{% endif %} | STALEX-ERP{% endblock %}
+{% block header_title %}{% if object %}Editar Orden de Compra{% else %}Nueva Orden de Compra{% endif %}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Datos de la Orden</h2>
+    </div>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div class="grid-cols-2">
+            <div class="form-group">
+                <label class="form-label">Fecha</label>
+                {{ form.fecha }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Proveedor</label>
+                {{ form.proveedor }}
+            </div>
+        </div>
+        
+        <div class="form-group" style="margin-top: 1rem;">
+            <label class="form-label">Notas</label>
+            {{ form.notas }}
+        </div>
+
+        <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--primary-color);">Detalles del Pedido (Ítems)</h3>
+        
+        <div class="table-wrapper" style="margin-bottom: 1rem;">
+            {{ detalles.management_form }}
+            <table id="detalles-table">
+                <thead>
+                    <tr>
+                        <th style="width: 35%;">Producto</th>
+                        <th style="width: 20%;">Presentación</th>
+                        <th>Cantidad</th>
+                        <th>Costo Unit. (S/.)</th>
+                        <th>SubTotal (S/.)</th>
+                        <th>Eliminar</th>
+                    </tr>
+                </thead>
+                <tbody id="formset-tbody">
+                    {% for dform in detalles %}
+                    <tr class="formset-row">
+                        <td>{{ dform.producto }}</td>
+                        <td>{{ dform.presentacion }}</td>
+                        <td>{{ dform.cantidad }}</td>
+                        <td>{{ dform.costo_unitario }}</td>
+                        <td style="vertical-align: middle; font-weight: bold; color: var(--primary-color);"><span class="row-subtotal">0.00</span></td>
+                        <td>
+                            {% if dform.instance.pk %}{{ dform.DELETE }}{% endif %}
+                            <button type="button" class="btn btn-danger btn-remove-row" style="padding: 0.25rem 0.5rem;"><span class="material-symbols-outlined" style="font-size: 1rem;">delete</span></button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <button type="button" id="add-row-btn" class="btn btn-secondary" style="margin-bottom: 2rem;">
+            <span class="material-symbols-outlined">add</span> Añadir Ítem
+        </button>
+
+        <div style="background: #f8fafc; padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); width: 300px; margin-left: auto; margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span style="color: var(--text-muted);">SubTotal:</span>
+                <strong>S/. <span id="label-subtotal">0.00</span></strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span style="color: var(--text-muted);">IGV (18%):</span>
+                <strong>S/. <span id="label-igv">0.00</span></strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--border-color); padding-top: 0.5rem; margin-top: 0.5rem; font-size: 1.1rem; color: var(--primary-color);">
+                <strong>Total General:</strong>
+                <strong>S/. <span id="label-total">0.00</span></strong>
+            </div>
+        </div>
+
+        <!-- Form template invisible para Javascript -->
+        <table style="display: none;">
+            <tbody id="empty-form-template">
+                <tr class="formset-row">
+                    <td>{{ detalles.empty_form.producto }}</td>
+                    <td>{{ detalles.empty_form.presentacion }}</td>
+                    <td>{{ detalles.empty_form.cantidad }}</td>
+                    <td>{{ detalles.empty_form.costo_unitario }}</td>
+                    <td style="vertical-align: middle; font-weight: bold; color: var(--primary-color);"><span class="row-subtotal">0.00</span></td>
+                    <td>
+                        <button type="button" class="btn btn-danger btn-remove-row" style="padding: 0.25rem 0.5rem;"><span class="material-symbols-outlined" style="font-size: 1rem;">delete</span></button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+            <a href="{% url 'compras:orden_compra_list' %}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary">
+                <span class="material-symbols-outlined">save</span> Generar Orden
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tableBody = document.getElementById('formset-tbody');
+    const addBtn = document.getElementById('add-row-btn');
+    const emptyFormTemplate = document.getElementById('empty-form-template').innerHTML;
+    const totalForms = document.getElementById('id_detalles-TOTAL_FORMS');
+
+    addBtn.addEventListener('click', function() {
+        const formCount = parseInt(totalForms.value);
+        const newFormHtml = emptyFormTemplate.replace(/__prefix__/g, formCount);
+        tableBody.insertAdjacentHTML('beforeend', newFormHtml);
+        totalForms.value = formCount + 1;
+    });
+
+    tableBody.addEventListener('click', function(e) {
+        if (e.target.closest('.btn-remove-row')) {
+            const row = e.target.closest('tr');
+            const deleteInput = row.querySelector('input[type="checkbox"][id$="-DELETE"]');
+            if (deleteInput) {
+                deleteInput.checked = true;
+                row.style.display = 'none';
+            } else {
+                row.remove();
+            }
+            calcularTotales();
+        }
+    });
+
+    function calcularTotales() {
+        let subtotal = 0;
+        const rows = document.querySelectorAll('#formset-tbody .formset-row');
+        
+        rows.forEach(row => {
+            if (row.style.display !== 'none') {
+                const cantidadInput = row.querySelector('input[id$="-cantidad"]');
+                const costoInput = row.querySelector('input[id$="-costo_unitario"]');
+                
+                if (cantidadInput && costoInput) {
+                    const cant = parseFloat(cantidadInput.value) || 0;
+                    const costo = parseFloat(costoInput.value) || 0;
+                    const rowSub = cant * costo;
+                    subtotal += rowSub;
+                    
+                    const rowSubtotalEl = row.querySelector('.row-subtotal');
+                    if (rowSubtotalEl) {
+                        rowSubtotalEl.innerText = rowSub.toFixed(2);
+                    }
+                }
+            }
+        });
+        
+        const igv = subtotal * 0.18;
+        const total = subtotal + igv;
+        
+        document.getElementById('label-subtotal').innerText = subtotal.toFixed(2);
+        document.getElementById('label-igv').innerText = igv.toFixed(2);
+        document.getElementById('label-total').innerText = total.toFixed(2);
+    }
+
+    // Auto populate cost and fetch presentations
+    tableBody.addEventListener('change', async function(e) {
+        const row = e.target.closest('tr');
+        
+        if (e.target.classList.contains('product-select')) {
+            const productoId = e.target.value;
+            const presentationSelect = row.querySelector('.presentation-select');
+            const costoInput = row.querySelector('input[id$="-costo_unitario"]');
+            
+            if (productoId) {
+                try {
+                    const response = await fetch(`/inventario/productos/api/info/${productoId}/`);
+                    const data = await response.json();
+                    
+                    // Mostramos el costo sugerido (puedes ajustar esta lógica si tienes costos por proveedor)
+                    costoInput.value = data.precio_venta; // De momento usamos precio_venta como base
+                    
+                    presentationSelect.innerHTML = '<option value="">--- Base/Unidad ---</option>';
+                    data.presentaciones.forEach(p => {
+                        const opt = document.createElement('option');
+                        opt.value = p.id;
+                        opt.dataset.precioPaquete = p.precio_paquete;
+                        opt.innerText = `${p.nombre} (Ref: S/. ${p.precio_paquete})`;
+                        presentationSelect.appendChild(opt);
+                    });
+                } catch (err) {
+                    console.error('Error fetching product details:', err);
+                }
+            }
+            calcularTotales();
+        }
+        
+        if (e.target.classList.contains('presentation-select')) {
+            const selectedOption = e.target.options[e.target.selectedIndex];
+            const costoInput = row.querySelector('input[id$="-costo_unitario"]');
+            
+            if (e.target.value && selectedOption.dataset.precioPaquete) {
+                costoInput.value = parseFloat(selectedOption.dataset.precioPaquete).toFixed(2);
+            }
+            calcularTotales();
+        }
+    });
+
+    tableBody.addEventListener('input', function(e) {
+        if (e.target.tagName === 'INPUT' && (e.target.id.includes('-cantidad') || e.target.id.includes('-costo_unitario'))) {
+            calcularTotales();
+        }
+    });
+
+    calcularTotales();
+});
+</script>
+{% endblock %}

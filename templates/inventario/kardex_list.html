@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Kardex | STALEX-ERP{% endblock %}
+{% block header_title %}Kardex de Almacén{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Movimientos de Inventario</h2>
+        <!-- Future: Add 'Registrar Movimiento Manual' button -->
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha y Hora</th>
+                    <th>Producto</th>
+                    <th>Almacén</th>
+                    <th>Tipo</th>
+                    <th>Motivo</th>
+                    <th>Referencia</th>
+                    <th style="text-align: right;">Cantidad</th>
+                    <th style="text-align: right;">Saldo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mov in kardex_records %}
+                <tr>
+                    <td>{{ mov.fecha|date:"d/m/Y H:i" }}</td>
+                    <td style="font-weight: 500;">{{ mov.producto.nombre }}</td>
+                    <td>{{ mov.almacen.nombre }}</td>
+                    <td>
+                        {% if mov.tipo_movimiento == 'ENTRADA' %}
+                            <span class="badge badge-green">Entrada</span>
+                        {% else %}
+                            <span class="badge badge-red">Salida</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ mov.motivo }}</td>
+                    <td>{{ mov.referencia|default:"-" }}</td>
+                    <td style="text-align: right; font-weight: 600; {% if mov.tipo_movimiento == 'ENTRADA' %}color: var(--success-color);{% else %}color: var(--danger-color);{% endif %}">
+                        {% if mov.tipo_movimiento == 'ENTRADA' %}+{% else %}-{% endif %}{{ mov.cantidad }}
+                    </td>
+                    <td style="text-align: right; font-weight: 700;">{{ mov.saldo_actual }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" style="text-align: center; color: var(--text-muted);">No hay movimientos registrados en el Kardex.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

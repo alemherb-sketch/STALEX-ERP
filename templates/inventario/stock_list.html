@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Stock de Productos | STALEX-ERP{% endblock %}
+{% block header_title %}Consulta de Stock Real{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 class="card-title">Resumen de Inventario Consolidado</h2>
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="{% url 'inventario:kardex_list' %}" class="btn btn-secondary">
+                <span class="material-symbols-outlined">history</span> Ver Kardex
+            </a>
+            <a href="{% url 'inventario:movimiento_almacen_create' %}" class="btn btn-primary">
+                <span class="material-symbols-outlined">add</span> Mov. Manual
+            </a>
+        </div>
+    </div>
+
+    <!-- Buscador sencillo -->
+    <div style="padding: 1rem; border-bottom: 1px solid var(--border-color); display: flex; gap: 1rem; background: #f8fafc;">
+        <div style="position: relative; flex: 1; max-width: 400px;">
+            <span class="material-symbols-outlined" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1.25rem;">search</span>
+            <input type="text" id="stock-search" placeholder="Buscar por código o nombre..." class="form-control" style="padding-left: 2.5rem;">
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table id="stock-table">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Producto</th>
+                    <th>Categoría</th>
+                    <th>Unidad</th>
+                    <th style="text-align: right;">Stock Total</th>
+                    <th>Estado</th>
+                    <th>Detalle Almacén</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in productos %}
+                <tr class="stock-row">
+                    <td><code>{{ producto.codigo }}</code></td>
+                    <td><strong>{{ producto.nombre }}</strong></td>
+                    <td><span style="font-size: 0.85rem; color: var(--text-muted);">{{ producto.categoria.nombre|default:"---" }}</span></td>
+                    <td>{{ producto.unidad_medida }}</td>
+                    <td style="text-align: right; font-weight: 700; font-size: 1.1rem; color: var(--primary-color);">
+                        {{ producto.stock_total|default:0|floatformat:2 }}
+                    </td>
+                    <td>
+                        {% if producto.stock_total > 50 %}
+                            <span class="badge badge-success">Suficiente</span>
+                        {% elif producto.stock_total > 5 %}
+                            <span class="badge badge-info" style="background: #e0f2fe; color: #0369a1;">Regular</span>
+                        {% else %}
+                            <span class="badge badge-danger">Crítico</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="font-size: 0.75rem;">
+                            {% for stock in producto.stocks.all %}
+                                <div style="display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 2px;">
+                                    <span style="color: var(--text-muted);">{{ stock.almacen.nombre }}:</span>
+                                    <strong>{{ stock.cantidad|floatformat:2 }}</strong>
+                                </div>
+                            {% empty %}
+                                <span style="color: var(--text-muted); font-style: italic;">Sin stock registrado</span>
+                            {% endfor %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                        No se encontraron productos en el inventario.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('stock-search').addEventListener('input', function(e) {
+    const term = e.target.value.toLowerCase();
+    const rows = document.querySelectorAll('.stock-row');
+    
+    rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(term) ? '' : 'none';
+    });
+});
+</script>
+{% endblock %}

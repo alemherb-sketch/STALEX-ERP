@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Iniciar Sesión | STALEX-ERP{% endblock %}
+{% block header_title %}Autenticación Requerida{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 400px; margin: 4rem auto;">
+    <div class="card-header" style="text-align: center; justify-content: center;">
+        <h2 class="card-title">Iniciar Sesión</h2>
+    </div>
+
+    <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+        <div style="background-color: var(--danger-color); color: white; padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1rem; text-align: center;">
+            Tu nombre de usuario o contraseña no coincidieron. Inténtalo otra vez.
+        </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label class="form-label" for="id_username">Usuario</label>
+            {{ form.username }}
+        </div>
+
+        <div class="form-group" style="margin-top: 1rem;">
+            <label class="form-label" for="id_password">Contraseña</label>
+            {{ form.password }}
+        </div>
+
+        <div style="margin-top: 2rem;">
+            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                Ingresar al Sistema
+            </button>
+        </div>
+        <input type="hidden" name="next" value="{{ next|default:"/" }}">
+    </form>
+</div>
+{% endblock %}

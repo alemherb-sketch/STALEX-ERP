@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Orden de Compra | STALEX-ERP{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 0 auto; text-align: center; padding: 2rem;">
+    <span class="material-symbols-outlined" style="font-size: 4rem; color: var(--danger-color); margin-bottom: 1rem;">warning</span>
+    <h2 class="card-title">¿Confirma la eliminación?</h2>
+    <p style="color: var(--text-muted); margin-bottom: 2rem;">
+        Está a punto de eliminar la Orden de Compra <strong>{{ object.numero }}</strong>. 
+        Esta acción es irreversible y se eliminarán todos sus detalles.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+            <a href="{% url 'compras:orden_compra_list' %}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-danger">Eliminar Definitivamente</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

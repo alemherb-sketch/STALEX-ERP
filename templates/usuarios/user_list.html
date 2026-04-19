@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Usuarios | STALEX-ERP{% endblock %}
+{% block header_title %}Administración de Usuarios{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Listado de Usuarios</h2>
+        <a href="{% url 'usuarios:user_create' %}" class="btn btn-primary">
+            <span class="material-symbols-outlined">add</span> Nuevo Usuario
+        </a>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Nombres</th>
+                    <th>Email</th>
+                    <th>Activo</th>
+                    <th>Roles</th>
+                    <th style="text-align: right;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for usuario in usuarios %}
+                <tr>
+                    <td style="font-weight: 600; color: var(--primary-color);">{{ usuario.username }}</td>
+                    <td>{{ usuario.first_name }} {{ usuario.last_name }}</td>
+                    <td>{{ usuario.email|default:"-" }}</td>
+                    <td>
+                        {% if usuario.is_active %}
+                            <span class="badge badge-green">Sí</span>
+                        {% else %}
+                            <span class="badge badge-red">No</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% for group in usuario.groups.all %}
+                            <span class="badge badge-blue" style="margin-right: 0.25rem;">{{ group.name }}</span>
+                        {% empty %}
+                            <span style="color: var(--text-muted); font-size: 0.75rem;">Sin roles</span>
+                        {% endfor %}
+                    </td>
+                    <td style="text-align: right; display: flex; gap: 0.5rem; justify-content: flex-end;">
+                        <a href="{% url 'usuarios:user_update' usuario.pk %}" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; background-color: #f59e0b; border-color: #f59e0b;" title="Editar">
+                            <span class="material-symbols-outlined" style="font-size: 1rem;">edit</span>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted);">No hay usuarios registrados.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

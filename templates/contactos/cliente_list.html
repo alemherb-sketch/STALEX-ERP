@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Clientes | STALEX-ERP{% endblock %}
+{% block header_title %}Directorio de Clientes{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Listado de Clientes</h2>
+        <a href="{% url 'contactos:cliente_create' %}" class="btn btn-primary">
+            <span class="material-symbols-outlined">add</span> Nuevo Cliente
+        </a>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Doc.</th>
+                    <th>Nro Documento</th>
+                    <th>Razón Social / Nombres</th>
+                    <th>Teléfono</th>
+                    <th>Email</th>
+                    <th style="text-align: right;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cliente in clientes %}
+                <tr>
+                    <td>{{ cliente.tipo_documento }}</td>
+                    <td>{{ cliente.numero_documento }}</td>
+                    <td style="font-weight: 500;">{{ cliente.razon_social_nombres }}</td>
+                    <td>{{ cliente.telefono|default:"-" }}</td>
+                    <td>{{ cliente.email|default:"-" }}</td>
+                    <td style="text-align: right; display: flex; gap: 0.5rem; justify-content: flex-end;">
+                        <a href="{% url 'contactos:cliente_update' cliente.pk %}" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; background-color: #f59e0b; border-color: #f59e0b;" title="Editar">
+                            <span class="material-symbols-outlined" style="font-size: 1rem;">edit</span>
+                        </a>
+                        <a href="{% url 'contactos:cliente_delete' cliente.pk %}" class="btn btn-danger" style="padding: 0.25rem 0.5rem;" title="Eliminar">
+                            <span class="material-symbols-outlined" style="font-size: 1rem;">delete</span>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted);">No hay clientes registrados aún.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

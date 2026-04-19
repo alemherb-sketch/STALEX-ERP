@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Almacenes | STALEX-ERP{% endblock %}
+{% block header_title %}Directorio de Almacenes{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Listado de Almacenes</h2>
+        <a href="{% url 'inventario:almacen_create' %}" class="btn btn-primary">
+            <span class="material-symbols-outlined">add</span> Nuevo Almacén
+        </a>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nombre del Almacén</th>
+                    <th>Ubicación</th>
+                    <th style="text-align: right;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for almacen in almacenes %}
+                <tr>
+                    <td style="font-weight: 600; color: var(--primary-color);">{{ almacen.nombre }}</td>
+                    <td>{{ almacen.ubicacion|default:"-" }}</td>
+                    <td style="text-align: right; display: flex; gap: 0.5rem; justify-content: flex-end;">
+                        <a href="{% url 'inventario:almacen_update' almacen.pk %}" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; background-color: #f59e0b; border-color: #f59e0b;" title="Editar">
+                            <span class="material-symbols-outlined" style="font-size: 1rem;">edit</span>
+                        </a>
+                        <a href="{% url 'inventario:almacen_delete' almacen.pk %}" class="btn btn-danger" style="padding: 0.25rem 0.5rem;" title="Eliminar">
+                            <span class="material-symbols-outlined" style="font-size: 1rem;">delete</span>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" style="text-align: center; color: var(--text-muted);">No hay almacenes registrados aún.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

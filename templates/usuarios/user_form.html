@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Editar Usuario{% else %}Nuevo Usuario{% endif %} | STALEX-ERP{% endblock %}
+{% block header_title %}{% if object %}Editar Usuario: {{ object.username }}{% else %}Crear Nuevo Usuario{% endif %}{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 800px; margin: 0 auto;">
+    <div class="card-header">
+        <h2 class="card-title">Datos y Permisos</h2>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+        <div style="background-color: var(--danger-color); color: white; padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1rem;">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <div class="grid-cols-2">
+            <div class="form-group">
+                <label class="form-label" for="{{ form.username.id_for_label }}">Nombre de Usuario</label>
+                {{ form.username }}
+                {{ form.username.errors }}
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="{{ form.email.id_for_label }}">Email</label>
+                {{ form.email }}
+                {{ form.email.errors }}
+            </div>
+        </div>
+        
+        {% if not object %}
+        <div class="grid-cols-2">
+            <div class="form-group">
+                <label class="form-label" for="{{ form.password1.id_for_label }}">Contraseña</label>
+                <!-- Hack para que el formulario se vea bien incluso si es nativo de django auth -->
+                {{ form.password1 }}
+                {{ form.password1.errors }}
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="{{ form.password2.id_for_label }}">Confirmar Contraseña</label>
+                {{ form.password2 }}
+                {{ form.password2.errors }}
+            </div>
+        </div>
+        {% else %}
+        <div class="form-group" style="margin-bottom: 1.5rem; padding: 1rem; background: #fffbe8; border: 1px solid #fef08a; border-radius: var(--radius-md);">
+            <label class="form-label" style="color: #854d0e;" for="{{ form.new_password.id_for_label }}">Resetear Contraseña (Opcional)</label>
+            {{ form.new_password }}
+            {{ form.new_password.errors }}
+            <span style="font-size: 0.75rem; color: #a16207;">Deja este campo en blanco a menos que necesites cambiarle la clave al empleado.</span>
+        </div>
+        {% endif %}
+
+        <div class="grid-cols-2">
+            <div class="form-group">
+                <label class="form-label" for="{{ form.first_name.id_for_label }}">Nombres</label>
+                {{ form.first_name }}
+                {{ form.first_name.errors }}
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="{{ form.last_name.id_for_label }}">Apellidos</label>
+                {{ form.last_name }}
+                {{ form.last_name.errors }}
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 1rem; margin-bottom: 2rem;">
+            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 500; cursor: pointer;">
+                {{ form.is_active }}
+                Usuario Activo (Puede iniciar sesión)
+            </label>
+        </div>
+
+        <h3 style="margin-bottom: 1rem; color: var(--primary-color);">Roles / Grupos</h3>
+        <div class="form-group" style="background: #f8fafc; padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            {{ form.groups }}
+            {{ form.groups.errors }}
+            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">Asigna todos los permisos base desde los Grupos.</p>
+        </div>
+        
+        <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--primary-color);">Permisos Específicos Adicionales</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; margin-top: -0.5rem;">Estos permisos anulan/complementan a los grupos. Ideal para detalles como "Puede ver precio".</p>
+        
+        <!-- El contenedor original modificado dinámicamente por JS -->
+        <div class="form-group" style="padding-bottom: 1rem;">
+            {{ form.user_permissions }}
+            {{ form.user_permissions.errors }}
+        </div>
+
+        <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
+            <a href="{% url 'usuarios:user_list' %}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary">
+                <span class="material-symbols-outlined">save</span> Guardar
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+    /* Estilos para los widgets de ChoiceMultiple para que no se vean mal por defecto */
+    #id_groups {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 0.5rem;
+    }
+    #id_groups div {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    input[type="password"] {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        font-family: inherit;
+        font-size: 0.875rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    /* Estilos para el Agrupamiento de Permisos */
+    .perm-module-section {
+        margin-bottom: 1rem;
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+    }
+    .perm-module-header {
+        background: #f8fafc;
+        padding: 0.75rem 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9rem;
+        color: var(--primary-color);
+    }
+    .perm-module-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+    }
+    .perm-module-grid div {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.85rem;
+    }
+    .btn-xs {
+        padding: 0.2rem 0.6rem;
+        font-size: 0.75rem;
+        border-radius: 4px;
+        background: #e2e8f0;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        color: #475569;
+        transition: 0.2s;
+    }
+    .btn-xs:hover { background: #cbd5e1; }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const permsContainer = document.getElementById('id_user_permissions');
+        if (!permsContainer) return;
+
+        // Crear una nueva caja envolvente
+        const newWrapper = document.createElement('div');
+        newWrapper.className = 'permissions-wrapper';
+        
+        const modules = {};
+
+        // Recorrer los items originales creados por Django
+        const items = permsContainer.querySelectorAll('div');
+        items.forEach(item => {
+            const label = item.querySelector('label');
+            if(label) {
+                // Separamos por "|" gracias a la traducción al vuelo que hicimos backend
+                const textParts = label.innerText.split('|');
+                let modName = "Otros";
+                let permName = label.innerText;
+                
+                if(textParts.length >= 2) {
+                    modName = textParts[0].trim();
+                    permName = textParts.slice(1).join('|').trim();
+                }
+
+                if(!modules[modName]) modules[modName] = [];
+                
+                // Actualizamos visualmente el texto para omitir la app (ya que será cabecera)
+                const cb = label.querySelector('input');
+                label.innerHTML = '';
+                label.appendChild(cb);
+                label.appendChild(document.createTextNode(' ' + permName));
+                
+                modules[modName].push(item);
+            }
+        });
+
+        // Generar la nueva estructura HTML con las cabeceras
+        for(const [modName, modItems] of Object.entries(modules).sort()) {
+            const section = document.createElement('div');
+            section.className = 'perm-module-section';
+            
+            // Calculamos cuántos hay checkeados para saber inicializar el boton
+            const checkedCount = modItems.filter(i => i.querySelector('input').checked).length;
+            const allChecked = checkedCount > 0 && checkedCount === modItems.length;
+
+            section.innerHTML = `
+                <div class="perm-module-header">
+                    <strong>${modName}</strong>
+                    <button type="button" class="btn-xs select-all-btn">${allChecked ? 'Desmarcar Todos' : 'Marcar Todos'}</button>
+                </div>
+                <div class="perm-module-grid"></div>
+            `;
+            
+            const grid = section.querySelector('.perm-module-grid');
+            modItems.forEach(item => grid.appendChild(item));
+            
+            // Evento para el botón Marcar/Desmarcar
+            const btn = section.querySelector('.select-all-btn');
+            btn.addEventListener('click', (e) => {
+                const cbs = grid.querySelectorAll('input[type="checkbox"]');
+                // Check if all are currently checked
+                const isAllFilled = Array.from(cbs).every(cb => cb.checked);
+                cbs.forEach(cb => cb.checked = !isAllFilled);
+                e.target.innerText = !isAllFilled ? "Desmarcar Todos" : "Marcar Todos";
+            });
+
+            newWrapper.appendChild(section);
+        }
+
+        // Reemplazar visualmente al contenedor anterior
+        permsContainer.parentNode.insertBefore(newWrapper, permsContainer);
+        // Ocultamos la caja de grilla original porque ya la vaciamos
+        permsContainer.style.display = 'none';
+    });
+</script>
+{% endblock %}

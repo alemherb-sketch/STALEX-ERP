@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Órdenes de Pedido | STALEX-ERP{% endblock %}
+{% block header_title %}Comercial - Órdenes de Pedido{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Listado de Órdenes de Pedido</h2>
+        <div style="display: flex; gap: 0.5rem;">
+            <button type="button" id="btn-generar-despacho" class="btn btn-secondary" style="background-color: #ea580c; border-color: #ea580c; display: none;" onclick="document.getElementById('form-despacho-consolidado').submit();">
+                <span class="material-symbols-outlined">local_shipping</span> Generar Despacho
+            </button>
+            <a href="{% url 'ventas:pedido_create' %}" class="btn btn-primary">
+                <span class="material-symbols-outlined">add</span> Nuevo Pedido
+            </a>
+        </div>
+    </div>
+
+    <form id="form-despacho-consolidado" method="post" action="{% url 'logistica:despacho_consolidar' %}">
+        {% csrf_token %}
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 40px; text-align: center;">
+                            <input type="checkbox" id="select-all" title="Seleccionar todos" style="width: 18px; height: 18px; cursor: pointer;">
+                        </th>
+                        <th>Número</th>
+                        <th>Fecha</th>
+                        <th>Cliente</th>
+                        <th>Cotización Ref.</th>
+                        <th>Estado</th>
+                        <th style="text-align: right;">Total</th>
+                        <th style="text-align: center;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pedido in pedidos %}
+                    <tr>
+                        <td style="text-align: center;">
+                            {% if pedido.estado == 'PENDIENTE' or pedido.estado == 'APROBADA' %}
+                            <input type="checkbox" name="pedidos_seleccionados" value="{{ pedido.pk }}" class="pedido-checkbox" style="width: 18px; height: 18px; cursor: pointer;">
+                            {% endif %}
+                        </td>
+                        <td style="font-weight: 600; color: var(--primary-color);">{{ pedido.numero }}</td>
+                        <td>{{ pedido.fecha|date:"d/m/Y" }}</td>
+                        <td style="font-weight: 500;">{{ pedido.cliente.razon_social_nombres }}</td>
+                        <td>{{ pedido.cotizacion_referencia.numero|default:"-" }}</td>
+                        <td>
+                            <span class="badge {% if pedido.estado == 'PENDIENTE' %}badge-yellow{% elif pedido.estado == 'ANULADA' %}badge-red{% elif pedido.estado == 'DESPACHADA' %}badge-green{% else %}badge-blue{% endif %}">
+                                {{ pedido.get_estado_display }}
+                            </span>
+                        </td>
+                        <td style="text-align: right; font-weight: 700;">S/. {{ pedido.total }}</td>
+                        <td style="text-align: center; display: flex; gap: 0.25rem; justify-content: center;">
+                            <a href="{% url 'ventas:pedido_print' pedido.pk %}" class="btn btn-secondary" style="padding: 0.25rem 0.5rem;" title="Imprimir" target="_blank">
+                                <span class="material-symbols-outlined" style="font-size: 1.1rem;">print</span>
+                            </a>
+                            <a href="{% url 'ventas:pedido_update' pedido.pk %}" class="btn btn-primary" style="padding: 0.25rem 0.5rem; background-color: #f59e0b; border-color: #f59e0b;" title="Editar">
+                                <span class="material-symbols-outlined" style="font-size: 1.1rem;">edit</span>
+                            </a>
+                            {% if pedido.estado != 'ANULADA' %}
+                            <form action="{% url 'ventas:pedido_anular' pedido.pk %}" method="post" style="display:inline;" onsubmit="return confirm('¿Estás seguro de que deseas ANULAR esta orden de pedido?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger" style="padding: 0.25rem 0.5rem; background-color: #64748b; border-color: #64748b;" title="Anular">
+                                    <span class="material-symbols-outlined" style="font-size: 1.1rem;">block</span>
+                                </button>
+                            </form>
+                            {% endif %}
+                            <a href="{% url 'ventas:pedido_delete' pedido.pk %}" class="btn btn-danger" style="padding: 0.25rem 0.5rem;" title="Eliminar">
+                                <span class="material-symbols-outlined" style="font-size: 1.1rem;">delete</span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; color: var(--text-muted);">No hay órdenes de pedido registradas aún.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAll = document.getElementById('select-all');
+    const checkboxes = document.querySelectorAll('.pedido-checkbox');
+    const btnDespacho = document.getElementById('btn-generar-despacho');
+    const formDespacho = document.getElementById('form-despacho-consolidado');
+
+    function actualizarBoton() {
+        const seleccionados = document.querySelectorAll('.pedido-checkbox:checked').length;
+        if (seleccionados > 0) {
+            btnDespacho.style.display = 'inline-flex';
+            btnDespacho.innerHTML = '<span class="material-symbols-outlined">local_shipping</span> Generar Despacho (' + seleccionados + ')';
+        } else {
+            btnDespacho.style.display = 'none';
+        }
+    }
+
+    selectAll.addEventListener('change', function() {
+        checkboxes.forEach(cb => { cb.checked = this.checked; });
+        actualizarBoton();
+    });
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', actualizarBoton);
+    });
+
+    btnDespacho.addEventListener('click', function(e) {
+        e.preventDefault();
+        const seleccionados = document.querySelectorAll('.pedido-checkbox:checked').length;
+        if (seleccionados === 0) {
+            alert('Debe seleccionar al menos una orden de pedido.');
+            return;
+        }
+        if (confirm('¿Generar una Orden de Despacho consolidada con ' + seleccionados + ' pedido(s) seleccionado(s)?')) {
+            formDespacho.submit();
+        }
+    });
+});
+</script>
+{% endblock %}

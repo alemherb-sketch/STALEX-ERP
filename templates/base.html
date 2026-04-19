@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es-PE">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}STALEX-ERP{% endblock %}</title>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Material Symbols Outlined -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <span class="material-symbols-outlined" style="font-size: 2rem;">business_center</span>
+            STALEX-ERP
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/" class="nav-item">
+                <span class="material-symbols-outlined">dashboard</span>
+                Dashboard
+            </a>
+            
+            <!-- Contactos -->
+            {% if request.user.is_superuser or perms.contactos %}
+            <div style="padding: 1rem 1.5rem 0.5rem; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+                Directorio
+            </div>
+            <a href="/contactos/clientes/" class="nav-item">
+                <span class="material-symbols-outlined">group</span>
+                Clientes
+            </a>
+            <a href="/contactos/proveedores/" class="nav-item">
+                <span class="material-symbols-outlined">domain</span>
+                Proveedores
+            </a>
+            {% endif %}
+
+            <!-- Compras -->
+            {% if request.user.is_superuser or perms.compras %}
+            <div style="padding: 1rem 1.5rem 0.5rem; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+                Abastecimiento
+            </div>
+            <a href="/compras/ordenes/" class="nav-item">
+                <span class="material-symbols-outlined">shopping_cart</span>
+                Órdenes de Compra
+            </a>
+            {% endif %}
+
+            <!-- Inventario -->
+            {% if request.user.is_superuser or perms.inventario %}
+            <div style="padding: 1rem 1.5rem 0.5rem; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+                Inventario
+            </div>
+            <a href="/inventario/stock/" class="nav-item">
+                <span class="material-symbols-outlined">analytics</span>
+                Consulta de Stock
+            </a>
+            <a href="/inventario/productos/" class="nav-item">
+                <span class="material-symbols-outlined">inventory_2</span>
+                Productos
+            </a>
+            <a href="/inventario/almacenes/" class="nav-item">
+                <span class="material-symbols-outlined">warehouse</span>
+                Almacenes
+            </a>
+            <a href="/inventario/kardex/" class="nav-item">
+                <span class="material-symbols-outlined">manage_search</span>
+                Kardex
+            </a>
+            <a href="/inventario/movimientos/" class="nav-item">
+                <span class="material-symbols-outlined">sync_alt</span>
+                Movimientos Manuales
+            </a>
+            {% endif %}
+
+            <!-- Ventas -->
+            {% if request.user.is_superuser or perms.ventas %}
+            <div style="padding: 1rem 1.5rem 0.5rem; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+                Comercial
+            </div>
+            <a href="/ventas/cotizaciones/" class="nav-item">
+                <span class="material-symbols-outlined">request_quote</span>
+                Cotizaciones
+            </a>
+            <a href="/ventas/pedidos/" class="nav-item">
+                <span class="material-symbols-outlined">receipt_long</span>
+                Órdenes de Pedido
+            </a>
+            {% endif %}
+
+            <!-- Logística -->
+            {% if request.user.is_superuser or perms.logistica %}
+            <div style="padding: 1rem 1.5rem 0.5rem; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+                Logística
+            </div>
+            <a href="/logistica/despachos/" class="nav-item">
+                <span class="material-symbols-outlined">local_shipping</span>
+                Órdenes de Despacho
+            </a>
+            <a href="/contactos/transportistas/" class="nav-item">
+                <span class="material-symbols-outlined">airport_shuttle</span>
+                Transportistas
+            </a>
+            {% endif %}
+
+            <!-- Administración -->
+            {% if request.user.is_superuser or perms.auth %}
+            <div style="padding: 1rem 1.5rem 0.5rem; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+                Configuración
+            </div>
+            <a href="/usuarios/" class="nav-item">
+                <span class="material-symbols-outlined">shield_person</span>
+                Usuarios y Roles
+            </a>
+            {% endif %}
+
+        </nav>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div class="main-content">
+        <!-- Top navbar -->
+        <header class="topbar">
+            <div class="topbar-title">
+                {% block header_title %}Inicio{% endblock %}
+            </div>
+            
+            <div class="user-menu" style="display: flex; align-items: center; gap: 1rem;">
+                {% if request.user.is_authenticated %}
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--primary-color); color: white; display:flex; align-items:center; justify-content:center; font-weight: bold;">
+                            {{ request.user.username|slice:":1"|upper }}
+                        </div>
+                        <span style="font-weight: 500; font-size: 0.875rem;">
+                            {{ request.user.username }}
+                        </span>
+                    </div>
+                    
+                    <form method="post" action="{% url 'logout' %}" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" style="background: none; border: none; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; padding: 0.25rem;" title="Cerrar Sesión">
+                            <span class="material-symbols-outlined">logout</span>
+                        </button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" style="color: var(--primary-color); text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; border: 1px solid var(--primary-color); padding: 0.5rem 1rem; border-radius: var(--radius-md);">
+                        <span class="material-symbols-outlined">login</span> Iniciar Sesión
+                    </a>
+                {% endif %}
+            </div>
+        </header>
+
+        <!-- Dynamic Content -->
+        <main class="content-area">
+            {% if messages %}
+                <div style="margin-bottom: 1.5rem;">
+                {% for message in messages %}
+                    <div style="padding: 1rem; border-radius: var(--radius-md); background: {% if message.tags == 'error' %}#fee2e2; color: #991b1b;{% else %}#d1fae5; color: #065f46;{% endif %} mb-2">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+                </div>
+            {% endif %}
+
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Orden de Despacho | STALEX-ERP{% endblock %}
+{% block header_title %}Eliminar Orden de Despacho{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 2rem auto; text-align: center;">
+    <div class="card-header" style="background-color: #fee2e2; border-bottom: 1px solid #fecaca; border-radius: var(--radius-lg) var(--radius-lg) 0 0;">
+        <h2 class="card-title" style="color: #dc2626; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            <span class="material-symbols-outlined">warning</span> Confirmar Eliminación
+        </h2>
+    </div>
+    <div class="card-body" style="padding: 2rem;">
+        <p style="font-size: 1.1rem; margin-bottom: 1.5rem;">¿Estás seguro de que deseas eliminar el Despacho <strong>{{ object.numero }}</strong>?</p>
+        
+        <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 2rem;">Esto eliminará permanentemente el registro. Si deseas mantener un histórico, usa "Anular".</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <a href="{% url 'logistica:despacho_list' %}" class="btn btn-secondary">Cancelar y Volver</a>
+                <button type="submit" class="btn btn-danger" style="background-color: #dc2626; color: white;">
+                    <span class="material-symbols-outlined">delete_forever</span> Sí, Eliminar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

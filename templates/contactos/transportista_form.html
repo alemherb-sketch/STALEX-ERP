@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Editar Transportista{% else %}Nuevo Transportista{% endif %} | STALEX-ERP{% endblock %}
+{% block header_title %}{% if object %}Editar Transportista{% else %}Nuevo Transportista{% endif %}{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 800px; margin: 0 auto;">
+    <div class="card-header">
+        <h2 class="card-title">Datos del Transportista</h2>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="grid-cols-2">
+            <div class="form-group">
+                <label class="form-label" for="{{ form.tipo_documento.id_for_label }}">Tipo de Documento</label>
+                {{ form.tipo_documento }}
+                {{ form.tipo_documento.errors }}
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="{{ form.numero_documento.id_for_label }}">Número de Documento</label>
+                {{ form.numero_documento }}
+                {{ form.numero_documento.errors }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="{{ form.nombre.id_for_label }}">Nombre o Razón Social</label>
+            {{ form.nombre }}
+            {{ form.nombre.errors }}
+        </div>
+
+        <div class="grid-cols-2">
+            <div class="form-group">
+                <label class="form-label" for="{{ form.placa_vehiculo.id_for_label }}">Placa del Vehículo</label>
+                {{ form.placa_vehiculo }}
+                {{ form.placa_vehiculo.errors }}
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="{{ form.licencia_conducir.id_for_label }}">Licencia de Conducir</label>
+                {{ form.licencia_conducir }}
+                {{ form.licencia_conducir.errors }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="{{ form.telefono.id_for_label }}">Teléfono</label>
+            {{ form.telefono }}
+            {{ form.telefono.errors }}
+        </div>
+
+        <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
+            <a href="{% url 'contactos:transportista_list' %}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary">
+                <span class="material-symbols-outlined">save</span> Guardar
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Movimientos de Almacén | STALEX-ERP{% endblock %}
+{% block header_title %}Control de Almacén{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 class="card-title">Movimientos Manuales (Ajustes/Entradas/Salidas)</h2>
+        <a href="{% url 'inventario:movimiento_almacen_create' %}" class="btn btn-primary">
+            <span class="material-symbols-outlined">sync_alt</span> Nuevo Movimiento
+        </a>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th>Almacén</th>
+                    <th>Motivo/Concepto</th>
+                    <th>Nro. Referencia</th>
+                    <th>Nro. Ítems</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mov in movimientos %}
+                <tr>
+                    <td>{{ mov.fecha|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        <span class="badge {% if mov.tipo == 'ENTRADA' %}badge-success{% else %}badge-danger{% endif %}">
+                            {{ mov.get_tipo_display }}
+                        </span>
+                    </td>
+                    <td>{{ mov.almacen.nombre }}</td>
+                    <td>{{ mov.motivo }}</td>
+                    <td>{{ mov.referencia|default:"---" }}</td>
+                    <td><strong>{{ mov.detalles.count }}</strong></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                        No hay movimientos manuales registrados.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

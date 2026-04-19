@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}Nuevo Movimiento de Almacén | STALEX-ERP{% endblock %}
+{% block header_title %}Nuevo Movimiento Manual{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Datos del Movimiento</h2>
+    </div>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div class="grid-cols-2">
+            <div class="form-group">
+                <label class="form-label">Tipo de Movimiento</label>
+                {{ form.tipo }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Almacén Origen/Destino</label>
+                {{ form.almacen }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Motivo / Concepto</label>
+                {{ form.motivo }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Referencia (Opcional)</label>
+                {{ form.referencia }}
+            </div>
+        </div>
+
+        <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--primary-color);">Detalle de Productos</h3>
+        
+        <div class="table-wrapper" style="margin-bottom: 1rem;">
+            {{ detalles.management_form }}
+            <table id="detalles-table">
+                <thead>
+                    <tr>
+                        <th style="width: 60%;">Producto</th>
+                        <th>Cantidad</th>
+                        <th style="width: 10%;">Eliminar</th>
+                    </tr>
+                </thead>
+                <tbody id="formset-tbody">
+                    {% for dform in detalles %}
+                    <tr class="formset-row">
+                        <td>{{ dform.producto }}</td>
+                        <td>{{ dform.cantidad }}</td>
+                        <td>
+                            {% if dform.instance.pk %}{{ dform.DELETE }}{% endif %}
+                            <button type="button" class="btn btn-danger btn-remove-row" style="padding: 0.25rem 0.5rem;"><span class="material-symbols-outlined" style="font-size: 1rem;">delete</span></button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <button type="button" id="add-row-btn" class="btn btn-secondary" style="margin-bottom: 2rem;">
+            <span class="material-symbols-outlined">add</span> Añadir Producto
+        </button>
+
+        <!-- Form template invisible para Javascript -->
+        <table style="display: none;">
+            <tbody id="empty-form-template">
+                <tr class="formset-row">
+                    <td>{{ detalles.empty_form.producto }}</td>
+                    <td>{{ detalles.empty_form.cantidad }}</td>
+                    <td>
+                        <button type="button" class="btn btn-danger btn-remove-row" style="padding: 0.25rem 0.5rem;"><span class="material-symbols-outlined" style="font-size: 1rem;">delete</span></button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; border-top: 1px solid var(--border-color); padding-top: 2rem;">
+            <a href="{% url 'inventario:movimiento_almacen_list' %}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary">
+                <span class="material-symbols-outlined">save</span> Registrar Movimiento
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tableBody = document.getElementById('formset-tbody');
+    const addBtn = document.getElementById('add-row-btn');
+    const emptyFormTemplate = document.getElementById('empty-form-template').innerHTML;
+    const totalForms = document.getElementById('id_detalles-TOTAL_FORMS');
+
+    addBtn.addEventListener('click', function() {
+        const formCount = parseInt(totalForms.value);
+        const newFormHtml = emptyFormTemplate.replace(/__prefix__/g, formCount);
+        tableBody.insertAdjacentHTML('beforeend', newFormHtml);
+        totalForms.value = formCount + 1;
+    });
+
+    tableBody.addEventListener('click', function(e) {
+        if (e.target.closest('.btn-remove-row')) {
+            const row = e.target.closest('tr');
+            const deleteInput = row.querySelector('input[type="checkbox"][id$="-DELETE"]');
+            if (deleteInput) {
+                deleteInput.checked = true;
+                row.style.display = 'none';
+            } else {
+                row.remove();
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

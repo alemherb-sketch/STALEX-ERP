@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Órdenes de Despacho | STALEX-ERP{% endblock %}
+{% block header_title %}Logística - Órdenes de Despacho{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Listado de Órdenes de Despacho</h2>
+        <a href="{% url 'logistica:despacho_create' %}" class="btn btn-primary">
+            <span class="material-symbols-outlined">add</span> Nuevo Despacho
+        </a>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Número</th>
+                    <th>Fecha</th>
+                    <th>Órdenes de Pedido</th>
+                    <th>Transportista</th>
+                    <th>Peso Total</th>
+                    <th>Estado</th>
+                    <th style="text-align: center;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for despacho in despachos %}
+                <tr>
+                    <td style="font-weight: 600; color: var(--primary-color);">{{ despacho.numero }}</td>
+                    <td>{{ despacho.fecha|date:"d/m/Y" }}</td>
+                    <td>
+                        {% for op in despacho.ordenes_pedido.all %}
+                            <span class="badge badge-blue" style="margin-right: 0.2rem;">{{ op.numero }}</span>
+                        {% empty %}
+                            <span style="color: var(--text-muted);">-</span>
+                        {% endfor %}
+                    </td>
+                    <td>{{ despacho.transportista.nombre|default:"-" }}</td>
+                    <td style="font-weight: 600;">{{ despacho.peso_total }} Kg</td>
+                    <td>
+                        <span class="badge {% if despacho.estado == 'PROGRAMADO' %}badge-yellow{% elif despacho.estado == 'ANULADO' %}badge-red{% elif despacho.estado == 'ENTREGADO' %}badge-green{% else %}badge-blue{% endif %}">
+                            {{ despacho.get_estado_display }}
+                        </span>
+                    </td>
+                    <td style="text-align: center; display: flex; gap: 0.25rem; justify-content: center;">
+                        <a href="{% url 'logistica:despacho_print' despacho.pk %}" class="btn btn-secondary" style="padding: 0.25rem 0.5rem;" title="Imprimir" target="_blank">
+                            <span class="material-symbols-outlined" style="font-size: 1.1rem;">print</span>
+                        </a>
+                        <a href="{% url 'logistica:despacho_update' despacho.pk %}" class="btn btn-primary" style="padding: 0.25rem 0.5rem; background-color: #f59e0b; border-color: #f59e0b;" title="Editar">
+                            <span class="material-symbols-outlined" style="font-size: 1.1rem;">edit</span>
+                        </a>
+                        {% if despacho.estado != 'ANULADO' %}
+                        <form action="{% url 'logistica:despacho_anular' despacho.pk %}" method="post" style="display:inline;" onsubmit="return confirm('¿Estás seguro de que deseas ANULAR este despacho?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger" style="padding: 0.25rem 0.5rem; background-color: #64748b; border-color: #64748b;" title="Anular">
+                                <span class="material-symbols-outlined" style="font-size: 1.1rem;">block</span>
+                            </button>
+                        </form>
+                        {% endif %}
+                        <a href="{% url 'logistica:despacho_delete' despacho.pk %}" class="btn btn-danger" style="padding: 0.25rem 0.5rem;" title="Eliminar">
+                            <span class="material-symbols-outlined" style="font-size: 1.1rem;">delete</span>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; color: var(--text-muted);">No hay órdenes de despacho registradas aún.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

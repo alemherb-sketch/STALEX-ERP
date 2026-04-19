@@ -1,0 +1,174 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Cotización {{ cotizacion.numero }}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #334155;
+            margin: 0;
+            padding: 40px;
+            background: white;
+            font-size: 14px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .company-details h1 {
+            color: #0f172a;
+            margin: 0 0 10px 0;
+            font-size: 24px;
+        }
+        .doc-details {
+            text-align: right;
+        }
+        .doc-details h2 {
+            color: #2563eb;
+            margin: 0 0 10px 0;
+            font-size: 28px;
+        }
+        .client-section {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        th {
+            background-color: #f1f5f9;
+            color: #475569;
+            font-weight: 600;
+        }
+        .totals {
+            width: 300px;
+            float: right;
+        }
+        .totals-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+        .totals-row.total-general {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2563eb;
+            border-top: 2px solid #e2e8f0;
+            margin-top: 10px;
+            padding-top: 10px;
+        }
+        .actions {
+            clear: both;
+            padding-top: 50px;
+            text-align: center;
+        }
+        .btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+        }
+        @media print {
+            .actions {
+                display: none;
+            }
+            body {
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body onload="window.print()">
+    <div class="header">
+        <div class="company-details">
+            <h1>STALEX ERP</h1>
+            <p>RUC: 20123456789</p>
+            <p>Av. Industrial 123, Lima, Perú</p>
+            <p>comercial@stalex.pe | (01) 555-0123</p>
+        </div>
+        <div class="doc-details">
+            <h2>COTIZACIÓN</h2>
+            <p><strong>N°:</strong> {{ cotizacion.numero }}</p>
+            <p><strong>Fecha Emitida:</strong> {{ cotizacion.fecha|date:"d/m/Y" }}</p>
+        </div>
+    </div>
+
+    <div class="client-section">
+        <p><strong>Señores:</strong> {{ cotizacion.cliente.razon_social_nombres }}</p>
+        <p><strong>RUC/DNI:</strong> {{ cotizacion.cliente.tipo_documento }} {{ cotizacion.cliente.documento }}</p>
+        <p><strong>Dirección:</strong> {{ cotizacion.cliente.direccion }}</p>
+        <p><strong>Teléfono:</strong> {{ cotizacion.cliente.telefono }}</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Ítem</th>
+                <th style="width: 50%;">Descripción</th>
+                <th style="text-align: center;">Cant.</th>
+                <th style="text-align: right;">P. Unit. (S/.)</th>
+                <th style="text-align: right;">SubTotal (S/.)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cotizacion.detalles.all %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ item.producto.nombre }}</td>
+                <td style="text-align: center;">{{ item.cantidad }}</td>
+                <td style="text-align: right;">{{ item.precio_unitario|floatformat:2 }}</td>
+                <td style="text-align: right;">{{ item.subtotal|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="totals">
+        <div class="totals-row">
+            <span>SubTotal:</span>
+            <span>S/. {{ cotizacion.subtotal|floatformat:2 }}</span>
+        </div>
+        <div class="totals-row">
+            <span>IGV (18%):</span>
+            <span>S/. {{ cotizacion.igv|floatformat:2 }}</span>
+        </div>
+        <div class="totals-row total-general">
+            <span>Total General:</span>
+            <span>S/. {{ cotizacion.total|floatformat:2 }}</span>
+        </div>
+    </div>
+
+    <div style="clear: both; padding-top: 40px; color: #64748b; font-size: 12px;">
+        <p><strong>Notas de Cotización:</strong></p>
+        <p>{{ cotizacion.notas|default:"Sin notas adicionales." }}</p>
+        <br><br>
+        <p>Atentamente,</p>
+        <p><strong>Área Comercial</strong><br>STALEX</p>
+    </div>
+
+    <div class="actions">
+        <button onclick="window.print()" class="btn">🖨️ Imprimir Documento</button>
+        <a href="{% url 'ventas:cotizacion_list' %}" class="btn" style="background: #64748b; margin-left: 10px;">Volver</a>
+    </div>
+</body>
+</html>

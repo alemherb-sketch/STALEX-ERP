@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard | STALEX-ERP{% endblock %}
+{% block header_title %}Panel de Control{% endblock %}
+
+{% block content %}
+<div class="grid-cols-4" style="margin-bottom: 2rem;">
+    <div class="card" style="margin-bottom: 0;">
+        <h3 style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.5rem; text-transform: uppercase;">Total Clientes</h3>
+        <div style="font-size: 2rem; font-weight: 800; color: var(--text-main);">12</div>
+    </div>
+    
+    <div class="card" style="margin-bottom: 0;">
+        <h3 style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.5rem; text-transform: uppercase;">Productos en Stock</h3>
+        <div style="font-size: 2rem; font-weight: 800; color: var(--text-main);">145</div>
+    </div>
+
+    <div class="card" style="margin-bottom: 0;">
+        <h3 style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.5rem; text-transform: uppercase;">Ventas del Mes</h3>
+        <div style="font-size: 2rem; font-weight: 800; color: var(--success-color);">S/. 12,450.00</div>
+    </div>
+    
+    <div class="card" style="margin-bottom: 0;">
+        <h3 style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.5rem; text-transform: uppercase;">Órdenes Pendientes</h3>
+        <div style="font-size: 2rem; font-weight: 800; color: var(--warning-color);">5</div>
+    </div>
+</div>
+
+<div class="grid-cols-2">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Últimos Clientes Registrados</h2>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.875rem;">Para ver la lista ve a <a href="{% url 'contactos:cliente_list' %}">Directorio de Clientes</a>.</p>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Kardex Reciente</h2>
+        </div>
+         <p style="color: var(--text-muted); font-size: 0.875rem;">Módulo en construcción...</p>
+    </div>
+</div>
+{% endblock %}

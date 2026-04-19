@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Cotización | STALEX-ERP{% endblock %}
+{% block header_title %}Eliminar Cotización{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 2rem auto; text-align: center;">
+    <div class="card-header" style="background-color: #fee2e2; border-bottom: 1px solid #fecaca; border-radius: var(--radius-lg) var(--radius-lg) 0 0;">
+        <h2 class="card-title" style="color: #dc2626; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            <span class="material-symbols-outlined">warning</span> Requerimiento de Confirmación
+        </h2>
+    </div>
+    <div class="card-body" style="padding: 2rem;">
+        <p style="font-size: 1.1rem; margin-bottom: 1.5rem;">¿Estás completamente seguro de que deseas eliminar la cotización <strong>{{ object.numero }}</strong> a nombre de <strong>{{ object.cliente.razon_social_nombres }}</strong>?</p>
+        
+        <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 2rem;">Esta acción eliminará el registro físicamente de la base de datos y no se podrá deshacer. Si deseas mantener un histórico, se recomienda usar la opción "Anular" en lugar de "Eliminar".</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <a href="{% url 'ventas:cotizacion_list' %}" class="btn btn-secondary">Cancelar y Volver</a>
+                <button type="submit" class="btn btn-danger" style="background-color: #dc2626; color: white;">
+                    <span class="material-symbols-outlined">delete_forever</span> Sí, Eliminar Completamente
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
