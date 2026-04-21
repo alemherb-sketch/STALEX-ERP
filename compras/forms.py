@@ -7,7 +7,7 @@ class OrdenCompraForm(forms.ModelForm):
         model = OrdenCompra
         fields = ['fecha', 'proveedor', 'notas']
         widgets = {
-            'fecha': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'fecha': forms.DateInput(format='%Y-%m-%d', attrs={'class': 'form-control', 'type': 'date'}),
             'proveedor': forms.Select(attrs={'class': 'form-control'}),
             'notas': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }

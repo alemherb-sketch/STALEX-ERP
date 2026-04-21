@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
-{% block title %}Nueva Cotización | STALEX-ERP{% endblock %}
-{% block header_title %}Nueva Cotización{% endblock %}
+{% block title %}{% if object.pk %}Editar{% else %}Nueva{% endif %} Cotización | STALEX-ERP{% endblock %}
+{% block header_title %}{% if object.pk %}Editar{% else %}Nueva{% endif %} Cotización{% endblock %}
 
 {% block content %}
 <div class="card">
@@ -11,6 +11,27 @@
     
     <form method="post">
         {% csrf_token %}
+
+        {% if form.errors or detalles.non_form_errors %}
+        <div style="background-color: #fee2e2; border: 1px solid #fecaca; color: #b91c1c; padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+            <h4 style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span class="material-symbols-outlined">error</span> Error al guardar
+            </h4>
+            <ul style="list-style: inside;">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+                {% for error in detalles.non_form_errors %}
+                    <li><strong>Detalles:</strong> {{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
         <div class="grid-cols-2">
             <div class="form-group">
                 <label class="form-label">Fecha</label>
@@ -45,13 +66,36 @@
                 <tbody id="formset-tbody">
                     {% for form in detalles %}
                     <tr class="formset-row">
-                        <td>{{ form.producto }}</td>
-                        <td>{{ form.presentacion }}</td>
-                        <td>{{ form.cantidad }}</td>
-                        <td>{{ form.precio_unitario }}</td>
-                        <td style="vertical-align: middle; font-weight: bold; color: var(--primary-color);"><span class="row-subtotal">0.00</span></td>
                         <td>
-                            {% if form.instance.pk %}{{ form.DELETE }}{% endif %}
+                            {% if form.instance.pk %}{{ form.id }}{% endif %}
+                            {{ form.producto }}
+                            {% if form.producto.errors %}
+                                <div style="color: #dc2626; font-size: 0.8rem; margin-top: 0.25rem;">{{ form.producto.errors|join:", " }}</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ form.presentacion }}
+                            {% if form.presentacion.errors %}
+                                <div style="color: #dc2626; font-size: 0.8rem; margin-top: 0.25rem;">{{ form.presentacion.errors|join:", " }}</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ form.cantidad }}
+                            {% if form.cantidad.errors %}
+                                <div style="color: #dc2626; font-size: 0.8rem; margin-top: 0.25rem;">{{ form.cantidad.errors|join:", " }}</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ form.precio_unitario }}
+                            {% if form.precio_unitario.errors %}
+                                <div style="color: #dc2626; font-size: 0.8rem; margin-top: 0.25rem;">{{ form.precio_unitario.errors|join:", " }}</div>
+                            {% endif %}
+                        </td>
+                        <td style="vertical-align: middle; font-weight: bold; color: var(--primary-color);"><span class="row-subtotal">0.00</span></td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            {% if form.instance.pk %}
+                                <div style="display: none;">{{ form.DELETE }}</div>
+                            {% endif %}
                             <button type="button" class="btn btn-danger btn-remove-row" style="padding: 0.25rem 0.5rem;"><span class="material-symbols-outlined" style="font-size: 1rem;">delete</span></button>
                         </td>
                     </tr>
@@ -97,7 +141,7 @@
         <div style="display: flex; gap: 1rem; justify-content: flex-end;">
             <a href="{% url 'ventas:cotizacion_list' %}" class="btn btn-secondary">Cancelar</a>
             <button type="submit" class="btn btn-primary">
-                <span class="material-symbols-outlined">save</span> Generar Cotización
+                <span class="material-symbols-outlined">save</span> {% if object.pk %}Guardar Cambios{% else %}Generar Cotización{% endif %}
             </button>
         </div>
     </form>

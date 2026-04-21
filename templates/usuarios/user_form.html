@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
-{% block title %}{% if object %}Editar Usuario{% else %}Nuevo Usuario{% endif %} | STALEX-ERP{% endblock %}
-{% block header_title %}{% if object %}Editar Usuario: {{ object.username }}{% else %}Crear Nuevo Usuario{% endif %}{% endblock %}
+{% block title %}{% if object.pk %}Editar{% else %}Nuevo{% endif %} Usuario | STALEX-ERP{% endblock %}
+{% block header_title %}{% if object.pk %}Editar Usuario: {{ object.username }}{% else %}Crear Nuevo Usuario{% endif %}{% endblock %}
 
 {% block content %}
 <div class="card" style="max-width: 800px; margin: 0 auto;">
@@ -12,9 +12,21 @@
     <form method="post">
         {% csrf_token %}
         
-        {% if form.non_field_errors %}
-        <div style="background-color: var(--danger-color); color: white; padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1rem;">
-            {{ form.non_field_errors }}
+        {% if form.errors %}
+        <div style="background-color: #fee2e2; border: 1px solid #fecaca; color: #b91c1c; padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+            <h4 style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span class="material-symbols-outlined">error</span> Error al guardar
+            </h4>
+            <ul style="list-style: inside;">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
         </div>
         {% endif %}
 
@@ -93,7 +105,7 @@
         <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
             <a href="{% url 'usuarios:user_list' %}" class="btn btn-secondary">Cancelar</a>
             <button type="submit" class="btn btn-primary">
-                <span class="material-symbols-outlined">save</span> Guardar
+                <span class="material-symbols-outlined">save</span> {% if object.pk %}Guardar Cambios{% else %}Crear Usuario{% endif %}
             </button>
         </div>
     </form>

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
-{% block title %}{% if object %}Editar Almacén{% else %}Nuevo Almacén{% endif %} | STALEX-ERP{% endblock %}
-{% block header_title %}{% if object %}Editar Almacén{% else %}Nuevo Almacén{% endif %}{% endblock %}
+{% block title %}{% if object.pk %}Editar{% else %}Nuevo{% endif %} Almacén | STALEX-ERP{% endblock %}
+{% block header_title %}{% if object.pk %}Editar{% else %}Nuevo{% endif %} Almacén{% endblock %}
 
 {% block content %}
 <div class="card" style="max-width: 800px; margin: 0 auto;">
@@ -11,6 +11,24 @@
 
     <form method="post">
         {% csrf_token %}
+
+        {% if form.errors %}
+        <div style="background-color: #fee2e2; border: 1px solid #fecaca; color: #b91c1c; padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+            <h4 style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span class="material-symbols-outlined">error</span> Error al guardar
+            </h4>
+            <ul style="list-style: inside;">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
         <div class="form-group">
             <label class="form-label" for="{{ form.nombre.id_for_label }}">Nombre del Almacén</label>
             {{ form.nombre }}
@@ -26,7 +44,7 @@
         <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
             <a href="{% url 'inventario:almacen_list' %}" class="btn btn-secondary">Cancelar</a>
             <button type="submit" class="btn btn-primary">
-                <span class="material-symbols-outlined">save</span> Guardar
+                <span class="material-symbols-outlined">save</span> {% if object.pk %}Guardar Cambios{% else %}Crear Almacén{% endif %}
             </button>
         </div>
     </form>

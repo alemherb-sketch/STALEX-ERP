@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
-{% block title %}Nuevo Movimiento de Almacén | STALEX-ERP{% endblock %}
-{% block header_title %}Nuevo Movimiento Manual{% endblock %}
+{% block title %}{% if object.pk %}Editar{% else %}Nuevo{% endif %} Movimiento de Almacén | STALEX-ERP{% endblock %}
+{% block header_title %}{% if object.pk %}Editar{% else %}Nuevo{% endif %} Movimiento de Almacén{% endblock %}
 
 {% block content %}
 <div class="card">
@@ -11,6 +11,27 @@
     
     <form method="post">
         {% csrf_token %}
+
+        {% if form.errors or detalles.non_form_errors %}
+        <div style="background-color: #fee2e2; border: 1px solid #fecaca; color: #b91c1c; padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+            <h4 style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span class="material-symbols-outlined">error</span> Error al guardar
+            </h4>
+            <ul style="list-style: inside;">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+                {% for error in detalles.non_form_errors %}
+                    <li><strong>Detalles:</strong> {{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
         <div class="grid-cols-2">
             <div class="form-group">
                 <label class="form-label">Tipo de Movimiento</label>
@@ -45,10 +66,23 @@
                 <tbody id="formset-tbody">
                     {% for dform in detalles %}
                     <tr class="formset-row">
-                        <td>{{ dform.producto }}</td>
-                        <td>{{ dform.cantidad }}</td>
                         <td>
-                            {% if dform.instance.pk %}{{ dform.DELETE }}{% endif %}
+                            {% if dform.instance.pk %}{{ dform.id }}{% endif %}
+                            {{ dform.producto }}
+                            {% if dform.producto.errors %}
+                                <div style="color: #dc2626; font-size: 0.8rem; margin-top: 0.25rem;">{{ dform.producto.errors|join:", " }}</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ dform.cantidad }}
+                            {% if dform.cantidad.errors %}
+                                <div style="color: #dc2626; font-size: 0.8rem; margin-top: 0.25rem;">{{ dform.cantidad.errors|join:", " }}</div>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            {% if dform.instance.pk %}
+                                <div style="display: none;">{{ dform.DELETE }}</div>
+                            {% endif %}
                             <button type="button" class="btn btn-danger btn-remove-row" style="padding: 0.25rem 0.5rem;"><span class="material-symbols-outlined" style="font-size: 1rem;">delete</span></button>
                         </td>
                     </tr>
@@ -76,7 +110,7 @@
         <div style="display: flex; gap: 1rem; justify-content: flex-end; border-top: 1px solid var(--border-color); padding-top: 2rem;">
             <a href="{% url 'inventario:movimiento_almacen_list' %}" class="btn btn-secondary">Cancelar</a>
             <button type="submit" class="btn btn-primary">
-                <span class="material-symbols-outlined">save</span> Registrar Movimiento
+                <span class="material-symbols-outlined">save</span> {% if object.pk %}Guardar Cambios{% else %}Registrar Movimiento{% endif %}
             </button>
         </div>
     </form>

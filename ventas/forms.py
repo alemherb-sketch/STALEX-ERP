@@ -7,7 +7,7 @@ class CotizacionForm(forms.ModelForm):
         model = Cotizacion
         fields = ['fecha', 'cliente', 'notas']
         widgets = {
-            'fecha': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'fecha': forms.DateInput(format='%Y-%m-%d', attrs={'class': 'form-control', 'type': 'date'}),
             'cliente': forms.Select(attrs={'class': 'form-control'}),
             'notas': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
@@ -33,7 +33,7 @@ class OrdenPedidoForm(forms.ModelForm):
         model = OrdenPedido
         fields = ['fecha', 'cliente', 'cotizacion_referencia']
         widgets = {
-            'fecha': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'fecha': forms.DateInput(format='%Y-%m-%d', attrs={'class': 'form-control', 'type': 'date'}),
             'cliente': forms.Select(attrs={'class': 'form-control'}),
             'cotizacion_referencia': forms.Select(attrs={'class': 'form-control'}),
         }

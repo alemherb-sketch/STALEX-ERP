@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
-{% block title %}{% if object %}Editar Producto{% else %}Nuevo Producto{% endif %} | STALEX-ERP{% endblock %}
-{% block header_title %}{% if object %}Editar Producto{% else %}Nuevo Producto{% endif %}{% endblock %}
+{% block title %}{% if object.pk %}Editar{% else %}Nuevo{% endif %} Producto | STALEX-ERP{% endblock %}
+{% block header_title %}{% if object.pk %}Editar{% else %}Nuevo{% endif %} Producto{% endblock %}
 
 {% block content %}
 <div class="card" style="max-width: 900px; margin: 0 auto;">
@@ -11,6 +11,27 @@
 
     <form method="post">
         {% csrf_token %}
+
+        {% if form.errors or presentaciones.non_form_errors %}
+        <div style="background-color: #fee2e2; border: 1px solid #fecaca; color: #b91c1c; padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+            <h4 style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span class="material-symbols-outlined">error</span> Error al guardar
+            </h4>
+            <ul style="list-style: inside;">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+                {% for error in presentaciones.non_form_errors %}
+                    <li><strong>Presentaciones:</strong> {{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
         <div class="grid-cols-2">
             <div class="form-group">
                 <label class="form-label" for="{{ form.codigo.id_for_label }}">Código</label>
@@ -79,11 +100,29 @@
                 <tbody id="presentaciones-tbody">
                     {% for pform in presentaciones %}
                     <tr class="formset-row">
-                        <td>{{ pform.nombre }}</td>
-                        <td>{{ pform.cantidad_por_paquete }}</td>
-                        <td>{{ pform.precio_paquete }}</td>
                         <td>
-                            {% if pform.instance.pk %}{{ pform.DELETE }}{% endif %}
+                            {% if pform.instance.pk %}{{ pform.id }}{% endif %}
+                            {{ pform.nombre }}
+                            {% if pform.nombre.errors %}
+                                <div style="color: #dc2626; font-size: 0.8rem; margin-top: 0.25rem;">{{ pform.nombre.errors|join:", " }}</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ pform.cantidad_por_paquete }}
+                            {% if pform.cantidad_por_paquete.errors %}
+                                <div style="color: #dc2626; font-size: 0.8rem; margin-top: 0.25rem;">{{ pform.cantidad_por_paquete.errors|join:", " }}</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ pform.precio_paquete }}
+                            {% if pform.precio_paquete.errors %}
+                                <div style="color: #dc2626; font-size: 0.8rem; margin-top: 0.25rem;">{{ pform.precio_paquete.errors|join:", " }}</div>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            {% if pform.instance.pk %}
+                                <div style="display: none;">{{ pform.DELETE }}</div>
+                            {% endif %}
                             <button type="button" class="btn btn-danger btn-remove-row" style="padding: 0.25rem 0.5rem;">
                                 <span class="material-symbols-outlined" style="font-size: 1rem;">delete</span>
                             </button>
@@ -116,7 +155,7 @@
         <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
             <a href="{% url 'inventario:producto_list' %}" class="btn btn-secondary">Cancelar</a>
             <button type="submit" class="btn btn-primary">
-                <span class="material-symbols-outlined">save</span> Guardar
+                <span class="material-symbols-outlined">save</span> {% if object.pk %}Guardar Cambios{% else %}Crear Producto{% endif %}
             </button>
         </div>
     </form>
