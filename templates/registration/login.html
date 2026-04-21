@@ -4,35 +4,46 @@
 {% block header_title %}Autenticación Requerida{% endblock %}
 
 {% block content %}
-<div class="card" style="max-width: 400px; margin: 4rem auto;">
-    <div class="card-header" style="text-align: center; justify-content: center;">
-        <h2 class="card-title">Iniciar Sesión</h2>
+<div class="login-card">
+    <div class="login-header">
+        <div class="login-logo">
+            <span class="material-symbols-outlined" style="font-size: 2.5rem;">business_center</span>
+        </div>
+        <h1 class="login-title">STALEX ERP</h1>
+        <p class="login-subtitle">Introduce tus credenciales para acceder</p>
     </div>
 
     <form method="post" action="{% url 'login' %}">
         {% csrf_token %}
         
         {% if form.errors %}
-        <div style="background-color: var(--danger-color); color: white; padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1rem; text-align: center;">
-            Tu nombre de usuario o contraseña no coincidieron. Inténtalo otra vez.
+        <div class="alert alert-error">
+            <span class="material-symbols-outlined">error</span>
+            Usuario o contraseña incorrectos.
         </div>
         {% endif %}
 
         <div class="form-group">
-            <label class="form-label" for="id_username">Usuario</label>
-            {{ form.username }}
+            <label class="form-label" for="id_username">Nombre de Usuario</label>
+            <input type="text" name="username" id="id_username" class="form-control" placeholder="admin" required autofocus>
         </div>
 
-        <div class="form-group" style="margin-top: 1rem;">
+        <div class="form-group" style="margin-top: 1.25rem;">
             <label class="form-label" for="id_password">Contraseña</label>
-            {{ form.password }}
+            <input type="password" name="password" id="id_password" class="form-control" placeholder="••••••••" required>
         </div>
 
-        <div style="margin-top: 2rem;">
-            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+        <div style="margin-top: 2.5rem;">
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
                 Ingresar al Sistema
+                <span class="material-symbols-outlined" style="font-size: 1.25rem;">chevron_right</span>
             </button>
         </div>
+        
+        <p style="text-align: center; margin-top: 2rem; font-size: 0.8rem; color: var(--text-muted);">
+            &copy; 2026 Stalex. Todos los derechos reservados.
+        </p>
+
         <input type="hidden" name="next" value="{{ next|default:"/" }}">
     </form>
 </div>

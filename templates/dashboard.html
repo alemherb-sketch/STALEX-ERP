@@ -4,41 +4,94 @@
 {% block header_title %}Panel de Control{% endblock %}
 
 {% block content %}
-<div class="grid-cols-4" style="margin-bottom: 2rem;">
-    <div class="card" style="margin-bottom: 0;">
-        <h3 style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.5rem; text-transform: uppercase;">Total Clientes</h3>
-        <div style="font-size: 2rem; font-weight: 800; color: var(--text-main);">12</div>
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">
+            <span class="material-symbols-outlined">group</span>
+        </div>
+        <div>
+            <span class="stat-value">12</span>
+            <span class="stat-label">Total Clientes</span>
+        </div>
     </div>
     
-    <div class="card" style="margin-bottom: 0;">
-        <h3 style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.5rem; text-transform: uppercase;">Productos en Stock</h3>
-        <div style="font-size: 2rem; font-weight: 800; color: var(--text-main);">145</div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background-color: #ecfdf5; color: #059669;">
+            <span class="material-symbols-outlined">inventory_2</span>
+        </div>
+        <div>
+            <span class="stat-value">145</span>
+            <span class="stat-label">Productos en Stock</span>
+        </div>
     </div>
 
-    <div class="card" style="margin-bottom: 0;">
-        <h3 style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.5rem; text-transform: uppercase;">Ventas del Mes</h3>
-        <div style="font-size: 2rem; font-weight: 800; color: var(--success-color);">S/. 12,450.00</div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background-color: #eef2ff; color: #4f46e5;">
+            <span class="material-symbols-outlined">payments</span>
+        </div>
+        <div>
+            <span class="stat-value">S/. 12,450.00</span>
+            <span class="stat-label">Ventas del Mes</span>
+        </div>
     </div>
     
-    <div class="card" style="margin-bottom: 0;">
-        <h3 style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.5rem; text-transform: uppercase;">Órdenes Pendientes</h3>
-        <div style="font-size: 2rem; font-weight: 800; color: var(--warning-color);">5</div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background-color: #fffbeb; color: #d97706;">
+            <span class="material-symbols-outlined">pending_actions</span>
+        </div>
+        <div>
+            <span class="stat-value">5</span>
+            <span class="stat-label">Órdenes Pendientes</span>
+        </div>
     </div>
 </div>
 
 <div class="grid-cols-2">
     <div class="card">
         <div class="card-header">
-            <h2 class="card-title">Últimos Clientes Registrados</h2>
+            <h2 class="card-title">Accesos Directos</h2>
         </div>
-        <p style="color: var(--text-muted); font-size: 0.875rem;">Para ver la lista ve a <a href="{% url 'contactos:cliente_list' %}">Directorio de Clientes</a>.</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <a href="{% url 'ventas:cotizacion_create' %}" class="btn btn-secondary" style="justify-content: flex-start;">
+                <span class="material-symbols-outlined">add_circle</span> Nueva Cotización
+            </a>
+            <a href="{% url 'compras:orden_compra_create' %}" class="btn btn-secondary" style="justify-content: flex-start;">
+                <span class="material-symbols-outlined">shopping_cart</span> Nueva Compra
+            </a>
+            <a href="{% url 'inventario:producto_list' %}" class="btn btn-secondary" style="justify-content: flex-start;">
+                <span class="material-symbols-outlined">inventory</span> Catálogo
+            </a>
+            <a href="{% url 'usuarios:user_list' %}" class="btn btn-secondary" style="justify-content: flex-start;">
+                <span class="material-symbols-outlined">settings</span> Configuración
+            </a>
+        </div>
     </div>
     
     <div class="card">
         <div class="card-header">
-            <h2 class="card-title">Kardex Reciente</h2>
+            <h2 class="card-title">Resumen Logístico</h2>
         </div>
-         <p style="color: var(--text-muted); font-size: 0.875rem;">Módulo en construcción...</p>
+        <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem;">Actividad reciente en el almacén central.</p>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Detalle</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="font-size: 0.8rem;">Hoy, 10:45 AM</td>
+                        <td style="font-size: 0.8rem;">Entrada de mercadería OC-2026-001</td>
+                    </tr>
+                    <tr>
+                        <td style="font-size: 0.8rem;">Hoy, 09:12 AM</td>
+                        <td style="font-size: 0.8rem;">Salida para despacho DP-2026-042</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 {% endblock %}
