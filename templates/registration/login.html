@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% block title %}Iniciar Sesión | STALEX-ERP{% endblock %}
-{% block header_title %}Autenticación Requerida{% endblock %}
 
 {% block content %}
 <div class="login-card">
@@ -44,7 +43,7 @@
             &copy; 2026 Stalex. Todos los derechos reservados.
         </p>
 
-        <input type="hidden" name="next" value="{{ next|default:"/" }}">
+        <input type="hidden" name="next" value="{{ next }}">
     </form>
 </div>
 {% endblock %}
