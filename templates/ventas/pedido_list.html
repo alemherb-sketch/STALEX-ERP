@@ -60,6 +60,14 @@
                             <a href="{% url 'ventas:pedido_update' pedido.pk %}" class="btn btn-primary" style="padding: 0.25rem 0.5rem; background-color: #f59e0b; border-color: #f59e0b;" title="Editar">
                                 <span class="material-symbols-outlined" style="font-size: 1.1rem;">edit</span>
                             </a>
+                            {% if pedido.estado == 'PENDIENTE' or pedido.estado == 'APROBADA' %}
+                            <form action="{% url 'logistica:despacho_individual' pedido.pk %}" method="post" style="display:inline;" onsubmit="return confirm('¿Generar Orden de Despacho inmediata para este pedido?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; background-color: #ea580c; border-color: #ea580c;" title="Generar Despacho">
+                                    <span class="material-symbols-outlined" style="font-size: 1.1rem;">local_shipping</span>
+                                </button>
+                            </form>
+                            {% endif %}
                             {% if pedido.estado != 'ANULADA' %}
                             <form action="{% url 'ventas:pedido_anular' pedido.pk %}" method="post" style="display:inline;" onsubmit="return confirm('¿Estás seguro de que deseas ANULAR esta orden de pedido?');">
                                 {% csrf_token %}

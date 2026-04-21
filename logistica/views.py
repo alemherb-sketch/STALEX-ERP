@@ -169,3 +169,51 @@ def generar_despacho_consolidado(request):
     numeros = ', '.join(p.numero for p in pedidos)
     messages.success(request, f"Despacho {despacho.numero} generado consolidando: {numeros}. Peso total: {peso_total} Kg.")
     return redirect('logistica:despacho_print', pk=despacho.pk)
+
+@login_required
+@permission_required('logistica.add_ordendespacho', raise_exception=True)
+@require_POST
+def generar_despacho_individual(request, pk):
+    """Genera una Orden de Despacho directamente para una única Orden de Pedido."""
+    pedido = get_object_or_404(OrdenPedido, pk=pk)
+    
+    if pedido.estado == 'DESPACHADA':
+        messages.warning(request, f"La Orden de Pedido {pedido.numero} ya ha sido despachada anteriormente.")
+        return redirect('ventas:pedido_list')
+    
+    if pedido.estado == 'ANULADA':
+        messages.error(request, f"No se puede despachar una Orden de Pedido que ha sido ANULADA.")
+        return redirect('ventas:pedido_list')
+
+    # Crear la Orden de Despacho
+    despacho = OrdenDespacho.objects.create(
+        numero=f"GUI-{datetime.date.today().year}-{random.randint(1000, 9999)}",
+        fecha=datetime.date.today(),
+        direccion_origen="Almacén Principal - Av. Industrial 123, Lima",
+        direccion_destino=pedido.cliente.direccion or "Por definir",
+        peso_total=Decimal('0.00'),
+        estado='PROGRAMADO',
+    )
+    
+    # Asociar la orden de pedido
+    despacho.ordenes_pedido.add(pedido)
+    
+    # Copiar detalles del pedido al despacho y calcular peso
+    peso_total = Decimal('0.00')
+    for detalle in pedido.detalles.all():
+        OrdenDespachoDetalle.objects.create(
+            despacho=despacho,
+            producto=detalle.producto,
+            cantidad=detalle.cantidad,
+        )
+        peso_total += detalle.cantidad * detalle.producto.peso
+    
+    despacho.peso_total = peso_total
+    despacho.save()
+    
+    # Marcar el pedido como despachado
+    pedido.estado = 'DESPACHADA'
+    pedido.save()
+    
+    messages.success(request, f"Despacho {despacho.numero} generado para el pedido {pedido.numero}. Peso total: {peso_total} Kg.")
+    return redirect('logistica:despacho_print', pk=despacho.pk)
