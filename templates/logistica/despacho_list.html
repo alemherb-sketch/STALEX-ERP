@@ -45,6 +45,9 @@
                         </span>
                     </td>
                     <td style="text-align: center; display: flex; gap: 0.25rem; justify-content: center;">
+                        <a href="{% url 'logistica:despacho_detail' despacho.pk %}" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; background-color: #3b82f6; border-color: #3b82f6;" title="Ver Detalle">
+                            <span class="material-symbols-outlined" style="font-size: 1.1rem;">visibility</span>
+                        </a>
                         <a href="{% url 'logistica:despacho_print' despacho.pk %}" class="btn btn-secondary" style="padding: 0.25rem 0.5rem;" title="Imprimir" target="_blank">
                             <span class="material-symbols-outlined" style="font-size: 1.1rem;">print</span>
                         </a>

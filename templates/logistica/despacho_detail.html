@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle de Despacho {{ despacho.numero }} | STALEX-ERP{% endblock %}
+{% block header_title %}Logística - Detalle de Despacho{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 1.5rem;">
+    <a href="{% url 'logistica:despacho_list' %}" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+        <span class="material-symbols-outlined">arrow_back</span> Volver al Listado
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 class="card-title">Información del Despacho: {{ despacho.numero }}</h2>
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="{% url 'logistica:despacho_print' despacho.pk %}" class="btn btn-secondary" style="background-color: #64748b; border-color: #64748b;" target="_blank">
+                <span class="material-symbols-outlined">print</span> Imprimir Guía
+            </a>
+            {% if despacho.estado == 'PROGRAMADO' or despacho.estado == 'EN_TRANSITO' %}
+            <form action="{% url 'logistica:despacho_entregar' despacho.pk %}" method="post" onsubmit="return confirm('¿Seguro que desea marcar este despacho como ENTREGADO?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary" style="background-color: #10b981; border-color: #10b981;">
+                    <span class="material-symbols-outlined">task_alt</span> Marcar como Entregado
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card-body" style="padding: 2rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-bottom: 2.5rem;">
+            <div>
+                <h3 style="font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">Detalles Generales</h3>
+                <p style="margin-bottom: 0.5rem;"><strong>Fecha:</strong> {{ despacho.fecha|date:"d/m/Y" }}</p>
+                <p style="margin-bottom: 0.5rem;"><strong>Estado:</strong> 
+                    <span class="badge {% if despacho.estado == 'PROGRAMADO' %}badge-yellow{% elif despacho.estado == 'ANULADO' %}badge-red{% elif despacho.estado == 'ENTREGADO' %}badge-green{% else %}badge-blue{% endif %}">
+                        {{ despacho.get_estado_display }}
+                    </span>
+                </p>
+                <p style="margin-bottom: 0.5rem;"><strong>Peso Total:</strong> {{ despacho.peso_total }} Kg</p>
+            </div>
+            <div>
+                <h3 style="font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">Transporte</h3>
+                <p style="margin-bottom: 0.5rem;"><strong>Transportista:</strong> {{ despacho.transportista.nombre|default:"Consignatario propio" }}</p>
+                <p style="margin-bottom: 0.5rem;"><strong>Origen:</strong> {{ despacho.direccion_origen }}</p>
+                <p style="margin-bottom: 0.5rem;"><strong>Destino:</strong> {{ despacho.direccion_destino }}</p>
+            </div>
+            <div>
+                <h3 style="font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">Órdenes Vinculadas</h3>
+                <ul style="list-style: none; padding: 0;">
+                    {% for op in despacho.ordenes_pedido.all %}
+                        <li style="margin-bottom: 0.25rem;">
+                            <a href="{% url 'ventas:pedido_print' op.pk %}" style="color: var(--primary-color); font-weight: 500; text-decoration: none;">
+                                {{ op.numero }}
+                            </a> - {{ op.cliente.razon_social_nombres }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <h3 style="font-size: 1.1rem; margin-bottom: 1rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem;">Productos en este Despacho</h3>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th style="text-align: center;">Cantidad</th>
+                        <th style="text-align: right;">Peso Línea</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for detalle in despacho.detalles.all %}
+                    <tr>
+                        <td style="font-weight: 500;">{{ detalle.producto.nombre }}</td>
+                        <td style="text-align: center;">{{ detalle.cantidad }}</td>
+                        <td style="text-align: right;">{{ detalle.peso_linea }} Kg</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr style="background-color: var(--bg-light); font-weight: 700;">
+                        <td colspan="2" style="text-align: right;">PESO TOTAL ESTIMADO:</td>
+                        <td style="text-align: right;">{{ despacho.peso_total }} Kg</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

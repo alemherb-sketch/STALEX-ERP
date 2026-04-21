@@ -217,3 +217,20 @@ def generar_despacho_individual(request, pk):
     
     messages.success(request, f"Despacho {despacho.numero} generado para el pedido {pedido.numero}. Peso total: {peso_total} Kg.")
     return redirect('logistica:despacho_print', pk=despacho.pk)
+
+class OrdenDespachoDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
+    model = OrdenDespacho
+    template_name = 'logistica/despacho_detail.html'
+    context_object_name = 'despacho'
+    permission_required = 'logistica.view_ordendespacho'
+
+@login_required
+@permission_required('logistica.change_ordendespacho', raise_exception=True)
+@require_POST
+def despacho_entregar(request, pk):
+    """Marca una Orden de Despacho como ENTREGADO."""
+    despacho = get_object_or_404(OrdenDespacho, pk=pk)
+    despacho.estado = 'ENTREGADO'
+    despacho.save()
+    messages.success(request, f"El Despacho {despacho.numero} ha sido marcado como ENTREGADO exitosamente.")
+    return redirect('logistica:despacho_detail', pk=despacho.pk)

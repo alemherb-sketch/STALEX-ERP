@@ -10,6 +10,8 @@ urlpatterns = [
     path('despachos/<int:pk>/editar/', views.OrdenDespachoUpdateView.as_view(), name='despacho_update'),
     path('despachos/<int:pk>/eliminar/', views.OrdenDespachoDeleteView.as_view(), name='despacho_delete'),
     path('despachos/<int:pk>/anular/', views.despacho_anular, name='despacho_anular'),
+    path('despachos/<int:pk>/', views.OrdenDespachoDetailView.as_view(), name='despacho_detail'),
+    path('despachos/<int:pk>/entregar/', views.despacho_entregar, name='despacho_entregar'),
     path('despachos/pedido/<int:pk>/generar/', views.generar_despacho_individual, name='despacho_individual'),
     path('despachos/<int:pk>/imprimir/', views.OrdenDespachoPrintView.as_view(), name='despacho_print'),
 ]
