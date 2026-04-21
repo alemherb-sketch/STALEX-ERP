@@ -1,3 +1,9 @@
+databases:
+  - name: stalex-db
+    databaseName: stalex_erp
+    user: stalex_user
+    plan: free
+
 services:
   - type: web
     name: stalex-erp
@@ -6,6 +12,10 @@ services:
     buildCommand: ./build.sh
     startCommand: gunicorn core.wsgi:application
     envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: stalex-db
+          property: connectionString
       - key: SECRET_KEY
         generateValue: true
       - key: DEBUG
