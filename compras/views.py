@@ -56,9 +56,15 @@ class OrdenCompraCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateV
             self.object.save()
             
             messages.success(self.request, "Orden de Compra generada exitosamente.")
-            return redirect('compras:orden_compra_list')
+            return redirect('compras:orden_compra_print', pk=self.object.pk)
         else:
             return self.form_invalid(form)
+
+class OrdenCompraPrintView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
+    model = OrdenCompra
+    template_name = 'compras/orden_compra_print.html'
+    context_object_name = 'orden'
+    permission_required = 'compras.view_ordencompra'
 
 class OrdenCompraUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = OrdenCompra

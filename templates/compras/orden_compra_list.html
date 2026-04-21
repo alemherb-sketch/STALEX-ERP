@@ -38,7 +38,7 @@
                     </td>
                     <td>
                         <div style="display: flex; gap: 0.5rem;">
-                            {% if orden.estado != 'RECIBIDA' %}
+                             {% if orden.estado != 'RECIBIDA' %}
                             <a href="{% url 'compras:orden_compra_update' orden.pk %}" class="btn-icon" title="Editar">
                                 <span class="material-symbols-outlined">edit</span>
                             </a>
@@ -46,6 +46,9 @@
                                 <span class="material-symbols-outlined">download_for_offline</span>
                             </a>
                             {% endif %}
+                            <a href="{% url 'compras:orden_compra_print' orden.pk %}" class="btn-icon" style="color: var(--primary-color);" title="Imprimir">
+                                <span class="material-symbols-outlined">print</span>
+                            </a>
                             <a href="{% url 'compras:orden_compra_delete' orden.pk %}" class="btn-icon" style="color: var(--danger-color);" title="Eliminar">
                                 <span class="material-symbols-outlined">delete_forever</span>
                             </a>
