@@ -1,15 +1,13 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Iniciar Sesión | STALEX-ERP{% endblock %}
 
 {% block content %}
 <div class="login-card">
     <div class="login-header">
-        <div class="login-logo">
-            <span class="material-symbols-outlined" style="font-size: 2.5rem;">business_center</span>
-        </div>
-        <h1 class="login-title">STALEX ERP</h1>
-        <p class="login-subtitle">Introduce tus credenciales para acceder</p>
+        <img src="{% static 'img/logo.png' %}" alt="Stalex" class="login-brand-logo">
+        <p class="login-subtitle">Sistema de Gestión Empresarial</p>
     </div>
 
     <form method="post">
@@ -23,24 +21,30 @@
         {% endif %}
 
         <div class="form-group">
-            <label class="form-label" for="id_username">Nombre de Usuario</label>
-            <input type="text" name="username" id="id_username" class="form-control" placeholder="admin" required autofocus>
+            <label class="form-label" for="id_username">
+                <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: -2px;">person</span>
+                Nombre de Usuario
+            </label>
+            <input type="text" name="username" id="id_username" class="form-control" placeholder="Ingresa tu usuario" required autofocus>
         </div>
 
         <div class="form-group" style="margin-top: 1.25rem;">
-            <label class="form-label" for="id_password">Contraseña</label>
+            <label class="form-label" for="id_password">
+                <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: -2px;">lock</span>
+                Contraseña
+            </label>
             <input type="password" name="password" id="id_password" class="form-control" placeholder="••••••••" required>
         </div>
 
-        <div style="margin-top: 2.5rem;">
+        <div style="margin-top: 2rem;">
             <button type="submit" class="btn btn-primary" style="width: 100%;">
+                <span class="material-symbols-outlined" style="font-size: 1.25rem;">login</span>
                 Ingresar al Sistema
-                <span class="material-symbols-outlined" style="font-size: 1.25rem;">chevron_right</span>
             </button>
         </div>
         
         <p style="text-align: center; margin-top: 2rem; font-size: 0.8rem; color: var(--text-muted);">
-            &copy; 2026 Stalex. Todos los derechos reservados.
+            &copy; 2026 Stalex S.A.C. — Ruedas y Garruchas
         </p>
 
         <input type="hidden" name="next" value="{{ next }}">

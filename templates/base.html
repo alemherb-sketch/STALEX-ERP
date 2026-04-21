@@ -24,8 +24,7 @@
     <!-- Sidebar -->
     <aside class="sidebar">
         <div class="sidebar-header">
-            <span class="material-symbols-outlined" style="font-size: 2rem;">business_center</span>
-            STALEX-ERP
+            <img src="{% static 'img/logo.png' %}" alt="Stalex ERP" class="sidebar-logo">
         </div>
         <nav class="sidebar-nav">
             <a href="/" class="nav-item">
@@ -93,6 +92,25 @@
                 Usuarios
             </a>
         </nav>
+
+        <!-- Sidebar Footer -->
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <div class="sidebar-user-avatar">
+                    {{ user.username|make_list|first|upper }}
+                </div>
+                <div class="sidebar-user-info">
+                    <span class="sidebar-user-name">{{ user.username }}</span>
+                    <span class="sidebar-user-role">Administrador</span>
+                </div>
+            </div>
+            <form method="post" action="{% url 'logout' %}" style="margin: 0;">
+                {% csrf_token %}
+                <button type="submit" class="btn-icon" title="Cerrar Sesión">
+                    <span class="material-symbols-outlined">logout</span>
+                </button>
+            </form>
+        </div>
     </aside>
 
     <!-- Main Wrapper -->
@@ -102,23 +120,11 @@
             <div class="topbar-title">
                 {% block header_title %}Inicio{% endblock %}
             </div>
-            
-            <div class="user-menu">
-                <div style="display: flex; align-items: center; gap: 0.75rem; background: var(--border-light); padding: 0.4rem 1rem; border-radius: 99px;">
-                    <div style="width: 28px; height: 28px; border-radius: 50%; background-color: var(--primary); color: white; display:flex; align-items:center; justify-content:center; font-weight: 700; font-size: 0.75rem;">
-                        {{ user.username|make_list|first|upper }}
-                    </div>
-                    <span style="font-weight: 600; font-size: 0.85rem; color: var(--text-main);">
-                        {{ user.username }}
-                    </span>
+            <div class="topbar-right">
+                <div class="topbar-date">
+                    <span class="material-symbols-outlined">calendar_today</span>
+                    <span id="current-date"></span>
                 </div>
-                
-                <form method="post" action="{% url 'logout' %}" style="margin: 0;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn-icon" title="Cerrar Sesión">
-                        <span class="material-symbols-outlined">logout</span>
-                    </button>
-                </form>
             </div>
         </header>
 
@@ -142,6 +148,15 @@
         </main>
     </div>
 </div>
+<script>
+    // Display current date in topbar
+    const dateEl = document.getElementById('current-date');
+    if (dateEl) {
+        const now = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        dateEl.textContent = now.toLocaleDateString('es-PE', options);
+    }
+</script>
 {% endif %}
 
     {% block extra_js %}{% endblock %}
