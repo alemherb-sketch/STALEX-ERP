@@ -7,7 +7,7 @@ class OrdenDespachoForm(forms.ModelForm):
         model = OrdenDespacho
         fields = ['fecha', 'transportista', 'direccion_origen', 'direccion_destino']
         widgets = {
-            'fecha': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'fecha': forms.DateInput(format='%Y-%m-%d', attrs={'class': 'form-control', 'type': 'date'}),
             'transportista': forms.Select(attrs={'class': 'form-control'}),
             'direccion_origen': forms.TextInput(attrs={'class': 'form-control'}),
             'direccion_destino': forms.TextInput(attrs={'class': 'form-control'}),

@@ -76,11 +76,8 @@ class OrdenDespachoUpdateView(LoginRequiredMixin, PermissionRequiredMixin, Updat
         if detalles.is_valid():
             self.object = form.save()
             detalles.instance = self.object
-            
-            for obj in detalles.deleted_objects:
-                obj.delete()
-                
             detalles.save()
+            
             messages.success(self.request, "Orden de Despacho actualizada exitosamente.")
             return super().form_valid(form)
         else:
