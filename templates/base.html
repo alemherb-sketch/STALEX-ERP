@@ -17,9 +17,9 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
-<body class="{% if not request.user.is_authenticated %}login-page{% endif %}">
+<body class="{% if not user.is_authenticated %}login-page{% endif %}">
 
-    {% if request.user.is_authenticated %}
+    {% if user.is_authenticated %}
     <div class="app-container">
         <!-- Sidebar -->
         <aside class="sidebar">
@@ -28,7 +28,7 @@
                 STALEX-ERP
             </div>
             <nav class="sidebar-nav">
-                <a href="/" class="nav-item {% if request.path == '/' %}active{% endif %}">
+                <a href="/" class="nav-item">
                     <span class="material-symbols-outlined">dashboard</span>
                     Dashboard
                 </a>
@@ -106,10 +106,10 @@
                 <div class="user-menu">
                     <div style="display: flex; align-items: center; gap: 0.75rem; background: var(--border-light); padding: 0.4rem 1rem; border-radius: 99px;">
                         <div style="width: 28px; height: 28px; border-radius: 50%; background-color: var(--primary); color: white; display:flex; align-items:center; justify-content:center; font-weight: 700; font-size: 0.75rem;">
-                            {{ request.user.username|slice:":1"|upper }}
+                            {{ user.username|slice:":1"|upper }}
                         </div>
                         <span style="font-weight: 600; font-size: 0.85rem; color: var(--text-main);">
-                            {{ request.user.username }}
+                            {{ user.username }}
                         </span>
                     </div>
                     
